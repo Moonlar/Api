@@ -16,7 +16,7 @@ routes.get('/', AppController.index);
 /* Admin Users Routes */
 routes.get('/admin/users', AdminUsersController.show);
 routes.get('/admin/user', UnavailableRoute);
-routes.get('/admin/user/:id', UnavailableRoute);
+routes.get('/admin/user/:nickname', UnavailableRoute);
 routes.post('/admin/user', UnavailableRoute);
 routes.patch('/admin/user', UnavailableRoute);
 routes.patch('/admin/user/:id', UnavailableRoute);

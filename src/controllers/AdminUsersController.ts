@@ -5,10 +5,10 @@ import { AdminUserData, Controller } from '../typings';
 export const AdminUsersController = {
   async show(req, res) {
     // Se não estiver conectado
-    // if (!req.isAuth) return res.authError();
+    if (!req.isAuth) return res.authError();
 
     // Se o nível de permissão não for manager
-    if (req.user?.permission !== 'manager')
+    if (req.user!.permission !== 'manager')
       return res
         .status(401)
         .json({ error: 'You do not have permission to access this' });
@@ -50,5 +50,33 @@ export const AdminUsersController = {
       limit,
       users: serializedUsers,
     });
+  },
+
+  async index(req, res) {
+    // Se não estiver conectado
+    if (!req.isAuth) return res.authError();
+
+    // Pegar parâmetro nickname da url
+    const { nickname } = req.params as { nickname?: string };
+
+    // Verificar se ele tem permissão para acessar estes dados
+    if (nickname && req.user!.permission !== 'manager')
+      return res
+        .status(401)
+        .json({ error: 'You do not have permission to access this feature' });
+
+    // Buscar dados
+    const user: AdminUserData = await conn('admin_users')
+      .select('*')
+      .where('nickname', nickname || req.user!.nickname)
+      .first();
+
+    // Retornar erro caso não tenha encontrado
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Remover campos sensíveis
+    const serializedUser = { ...user, password: undefined };
+
+    return res.json(serializedUser);
   },
 } as Controller;
