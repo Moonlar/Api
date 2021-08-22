@@ -1,9 +1,13 @@
 import { Router } from 'express';
 
 import { AppController } from './controllers/AppController';
+import { Auth } from './middlewares/Auth';
 import { UnavailableRoute } from './utils/UnavailableRoute';
 
 const routes = Router();
+
+/* Middlewares */
+routes.use(Auth);
 
 /* App Routes */
 routes.get('/', AppController.index);
