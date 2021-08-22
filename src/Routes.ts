@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { AdminUsersController } from './controllers/AdminUsersController';
 
 import { AppController } from './controllers/AppController';
 import { Auth } from './middlewares/Auth';
@@ -13,7 +14,7 @@ routes.use(Auth);
 routes.get('/', AppController.index);
 
 /* Admin Users Routes */
-routes.get('/admin/users', UnavailableRoute);
+routes.get('/admin/users', AdminUsersController.show);
 routes.get('/admin/user', UnavailableRoute);
 routes.get('/admin/user/:id', UnavailableRoute);
 routes.post('/admin/user', UnavailableRoute);
