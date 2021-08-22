@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import path from 'path';
+import cookieParser from 'cookie-parser';
 import 'dotenv/config';
 
 import Routes from './Routes';
@@ -9,6 +10,7 @@ import Routes from './Routes';
 const app = express();
 
 app.use(morgan('tiny'));
+app.use(cookieParser());
 app.use(
   cors({
     credentials: true,
