@@ -3,7 +3,7 @@ import { Knex } from 'knex';
 export async function up(knex: Knex): Promise<void> {
   return knex.schema.createTable('coupons', (table) => {
     table.string('id').primary();
-    table.string('code').notNullable();
+    table.string('code').notNullable().unique();
     table.string('title').notNullable();
     table.string('description').notNullable();
     table.float('discount').notNullable();

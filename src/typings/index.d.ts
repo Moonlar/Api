@@ -26,6 +26,7 @@ interface Controller {
 interface AdminUserData {
   id: string;
   nickname: string;
+  display_name: string;
   email: string;
   password: string;
   permission: 'admin' | 'manager';
