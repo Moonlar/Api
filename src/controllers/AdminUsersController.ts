@@ -219,4 +219,45 @@ export const AdminUsersController = {
 
     return res.status(200).json({ message: 'Successfully updated account' });
   },
+
+  async delete(req, res) {
+    // Se não estiver conectado
+    if (!req.isAuth) return res.authError();
+
+    // Pegar id dos parâmetros de rota
+    const { id } = req.params as { id?: string };
+
+    // Verificar se tem permissão para executar
+    if (req.user!.permission !== 'manager')
+      return res
+        .status(401)
+        .json({ error: 'You do not have permission to access this feature' });
+
+    // Verificar se o usuário existe mesmo
+    const userExist: AdminUserData = await conn('admin_users')
+      .select('*')
+      .where(id ? 'id' : 'nickname', id || req.user!.nickname)
+      .first();
+
+    if (!userExist) return res.status(404).json({ error: 'User not found' });
+
+    // Atualizar informações
+    await conn('admin_users')
+      .update({ updated_at: conn.fn.now(), deleted_at: conn.fn.now() })
+      .where('id', id || req.user!.nickname);
+
+    // Remover cookie com token
+    if (!id) {
+      res.cookie('token', '', {
+        httpOnly: true,
+        maxAge: 0,
+        secure: process.env.NODE_ENV === 'production',
+      });
+    }
+
+    // Adicionar token a blacklist
+    /* To-Do */
+
+    return res.status(202).json({ message: 'Account successfully deleted' });
+  },
 } as Controller;

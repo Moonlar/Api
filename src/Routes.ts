@@ -20,7 +20,7 @@ routes.get('/admin/user/:nickname', AdminUsersController.index);
 routes.post('/admin/user', AdminUsersController.create);
 routes.patch('/admin/user', AdminUsersController.update);
 routes.patch('/admin/user/:id', AdminUsersController.update);
-routes.delete('/admin/user/:id', UnavailableRoute);
+routes.delete('/admin/user/:id', AdminUsersController.delete);
 
 /* Admin Auth Routes */
 routes.get('/admin/auth', UnavailableRoute);
