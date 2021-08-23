@@ -1,7 +1,12 @@
 import * as yup from 'yup';
 
 export const CreateAdminUserSchema = yup.object().shape({
-  nickname: yup.string().required().min(4).max(20),
+  nickname: yup
+    .string()
+    .required()
+    .min(4)
+    .max(20)
+    .matches(/^[A-Za-z0-9_]+$/),
   permission: yup.string().oneOf(['admin', 'manager']),
   email: yup.string().required().email(),
 });

@@ -86,7 +86,7 @@ export const AdminUsersController = {
     // Buscar dados
     const user: AdminUserData = await conn('admin_users')
       .select('*')
-      .where('nickname', nickname || req.user!.nickname)
+      .where('nickname', nickname ? nickname.toLowerCase() : req.user!.nickname)
       .first();
 
     // Retornar erro caso não tenha encontrado
@@ -106,7 +106,7 @@ export const AdminUsersController = {
     if (req.user!.permission !== 'manager')
       return res
         .status(401)
-        .json({ error: 'You do not have permission to perform this action.' });
+        .json({ error: 'You do not have permission to perform this action' });
 
     // Pegar dados do body
     let { nickname, email } = req.body as CreateAdminUserData;
@@ -150,7 +150,7 @@ export const AdminUsersController = {
 
     await conn('admin_users').insert(newUser);
 
-    return res.status(201).json({ message: 'Successfully created account' });
+    return res.status(201).json({ message: 'User created successfully' });
   },
 
   async update(req, res) {
