@@ -2,7 +2,10 @@ import { v4 as uuid } from 'uuid';
 
 import conn from '../database/Connection';
 import Password from '../utils/Password';
-import { CreateAdminUserSchema } from '../utils/Validators';
+import {
+  CreateAdminUserSchema,
+  UpdateAdminUserSchema,
+} from '../utils/Validators';
 
 import { AdminUserData, Controller } from '../typings';
 
@@ -12,8 +15,9 @@ interface CreateAdminUserData {
 }
 
 interface UpdateAdminUserData {
-  nickname: string;
-  email: string;
+  nickname?: string;
+  email?: string;
+  permission?: string;
 }
 
 export const AdminUsersController = {
@@ -147,5 +151,72 @@ export const AdminUsersController = {
     await conn('admin_users').insert(newUser);
 
     return res.status(201).json({ message: 'Successfully created account' });
+  },
+
+  async update(req, res) {
+    // Se não estiver conectado
+    if (!req.isAuth) res.authError();
+
+    // Pegar id dos parâmetros de rota
+    const { id } = req.params as { id?: string };
+
+    // Verificar se tem permissão para executar
+    if (id && req.user!.permission !== 'manager')
+      return res
+        .status(401)
+        .json({ error: 'You do not have permission to access this feature.' });
+
+    // Pegar dados do corpo da requisição
+    let { nickname, email, permission } = req.body as UpdateAdminUserData;
+
+    // Retornar erro caso não tenha dados para atualizar
+    if (!nickname && !email && !permission)
+      return res.status(400).json({ error: 'No data to update' });
+
+    // Remover espaços
+    if (nickname) nickname = nickname.trim();
+    if (email) email = email.trim();
+    if (permission) permission = permission.trim();
+
+    // Validar dados
+    try {
+      UpdateAdminUserSchema.validateSync(
+        { nickname, email, permission },
+        { abortEarly: false }
+      );
+    } catch (err) {
+      return res
+        .status(400)
+        .json({ error: 'Invalid body', errors: err.errors });
+    }
+
+    // Verificar disponibilidade do nickname
+    if (nickname) {
+      const userAlreadyExist: AdminUserData | undefined = await conn(
+        'admin_users'
+      )
+        .select('id')
+        .where('nickname', nickname.toLowerCase())
+        .first();
+
+      if (userAlreadyExist)
+        return res.status(401).json({ error: 'Nickname already exist' });
+    }
+
+    // Novos dados para atualizar
+    const newData = {
+      nickname: nickname ? nickname.toLowerCase() : undefined,
+      display_name: nickname,
+      permission,
+      email,
+      updated_at: conn.fn.now() as any,
+    } as AdminUserData;
+
+    // Atualizar dados
+    await conn('admin_users')
+      .update(newData)
+      .where(id ? 'id' : 'nickname', id || req.user!.nickname);
+
+    return res.status(200).json({ message: 'Successfully updated account' });
   },
 } as Controller;

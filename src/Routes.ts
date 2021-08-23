@@ -18,8 +18,8 @@ routes.get('/admin/users', AdminUsersController.show);
 routes.get('/admin/user', AdminUsersController.index);
 routes.get('/admin/user/:nickname', AdminUsersController.index);
 routes.post('/admin/user', AdminUsersController.create);
-routes.patch('/admin/user', UnavailableRoute);
-routes.patch('/admin/user/:id', UnavailableRoute);
+routes.patch('/admin/user', AdminUsersController.update);
+routes.patch('/admin/user/:id', AdminUsersController.update);
 routes.delete('/admin/user/:id', UnavailableRoute);
 
 /* Admin Auth Routes */
