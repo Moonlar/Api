@@ -177,11 +177,11 @@ describe('GET /admin/users', () => {
     });
 
     const response = await request(app)
-      .get('/admin/user/MxD_')
+      .get('/admin/user/Admin')
       .set('Cookie', [`token=${token}`])
-      .expect('Content-Type', /json/)
-      .expect(401);
+      .expect('Content-Type', /json/);
 
+    expect(response.statusCode).toBe(401);
     expect(response.body).toBeTruthy();
     expect(response.body).toHaveProperty(
       'error',
@@ -198,9 +198,9 @@ describe('GET /admin/users', () => {
     const response = await request(app)
       .get('/admin/user/NotExist')
       .set('Cookie', [`token=${token}`])
-      .expect('Content-Type', /json/)
-      .expect(404);
+      .expect('Content-Type', /json/);
 
+    expect(response.statusCode).toBe(404);
     expect(response.body).toBeTruthy();
     expect(response.body).toHaveProperty('error', 'User not found');
   });
@@ -384,46 +384,215 @@ describe('GET /admin/users', () => {
     expect(response.body.nickname).toBe(data.nickname.toLowerCase().trim());
     expect(response.body.display_name).toBe(data.nickname.trim());
     expect(response.body.email).toBe(data.email.trim());
-
-    console.log(response.body);
   });
 
   /* PATCH /admin/user/:id */
 
-  /* it('should be update a user', async () => {
+  it('should be not allowed to execute', async () => {
+    /* Without Token */
+    let response = await request(app)
+      .patch('/admin/user')
+      .expect('Content-Type', /json/)
+      .expect(401);
+
+    expect(response.body).toBeTruthy();
+    expect(response.body).toHaveProperty(
+      'error',
+      'You need to be authenticated to access this feature'
+    );
+
+    /* With User Token */
+    let token = GenerateToken(1000000, {
+      nickname: 'mxd_',
+      permission: 'user',
+    });
+
+    response = await request(app)
+      .patch('/admin/user')
+      .set('Cookie', [`token=${token}`])
+      .expect('Content-Type', /json/)
+      .expect(401);
+
+    expect(response.body).toBeTruthy();
+    expect(response.body).toHaveProperty(
+      'error',
+      'You do not have permission to access this feature'
+    );
+
+    /* With Admin Token */
+    token = GenerateToken(1000000, {
+      nickname: 'admin',
+      permission: 'admin',
+    });
+
+    response = await request(app)
+      .patch('/admin/user')
+      .set('Cookie', [`token=${token}`])
+      .expect('Content-Type', /json/)
+      .expect(401);
+
+    expect(response.body).toBeTruthy();
+    expect(response.body).toHaveProperty(
+      'error',
+      'You do not have permission to access this feature'
+    );
+  });
+
+  it('should be invalid data to update', async () => {
     const token = GenerateToken(1000000, {
       nickname: 'manager',
       permission: 'manager',
     });
 
-    const data = {
-      nickname: 'NewUser',
-      email: 'newuser@gmail.com',
-    };
+    /* No data */
+    let data = {};
 
     let response = await request(app)
-      .post('/admin/user')
+      .patch('/admin/user')
       .send(data)
       .set('Cookie', [`token=${token}`])
       .expect('Content-Type', /json/)
-      .expect(201);
+      .expect(400);
 
     expect(response.body).toBeTruthy();
-    expect(response.body).toHaveProperty(
-      'message',
-      'User created successfully'
-    );
+    expect(response.body).toHaveProperty('error', 'No data to update');
+
+    /* Invalid data nickname */
+    data = {
+      nickname: 'dwnq dqwj $',
+    };
 
     response = await request(app)
-      .get('/admin/user/NewUser')
+      .patch('/admin/user')
+      .send(data)
       .set('Cookie', [`token=${token}`])
       .expect('Content-Type', /json/)
-      .expect(200);
+      .expect(400);
 
+    expect(response.body).toBeTruthy();
+    expect(response.body).toHaveProperty('error', 'Invalid body');
+
+    /* Invalid data email */
+    data = {
+      email: 'dwnq dqwj $',
+    };
+
+    response = await request(app)
+      .patch('/admin/user')
+      .send(data)
+      .set('Cookie', [`token=${token}`])
+      .expect('Content-Type', /json/)
+      .expect(400);
+
+    expect(response.body).toBeTruthy();
+    expect(response.body).toHaveProperty('error', 'Invalid body');
+
+    /* Invalid data permission */
+    data = {
+      permission: 'dwnq dqwj $',
+    };
+
+    response = await request(app)
+      .patch('/admin/user')
+      .send(data)
+      .set('Cookie', [`token=${token}`])
+      .expect('Content-Type', /json/)
+      .expect(400);
+
+    expect(response.body).toBeTruthy();
+    expect(response.body).toHaveProperty('error', 'Invalid body');
+  });
+
+  it('should be update a user', async () => {
+    const token = GenerateToken(1000000, {
+      nickname: 'manager',
+      permission: 'manager',
+    });
+
+    /* Update nickname and display_name */
+    let data = {
+      nickname: 'UpdatedUser',
+    } as {
+      nickname: string;
+      email: string | undefined;
+      permission: 'admin' | 'manager' | undefined;
+    };
+
+    let response = await request(app)
+      .patch(`/admin/user/newuser`)
+      .send(data)
+      .set('Cookie', [`token=${token}`])
+      .expect('Content-Type', /json/);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toBeTruthy();
+    expect(response.body).toHaveProperty('message', 'User update successfully');
+
+    response = await request(app)
+      .get(`/admin/user/${data.nickname}`)
+      .set('Cookie', [`token=${token}`])
+      .expect('Content-Type', /json/);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toBeTruthy();
+    expect(response.body).toMatchSchema(userSchema);
+    expect(response.body.nickname).toBe(data.nickname.toLowerCase());
+    expect(response.body.display_name).toBe(data.nickname);
+    expect(response.body.password).toBe(undefined);
+
+    /* Update email */
+    data.email = 'updated@gmail.com';
+
+    response = await request(app)
+      .patch(`/admin/user/${data.nickname}`)
+      .send({ ...data, nickname: undefined })
+      .set('Cookie', [`token=${token}`])
+      .expect('Content-Type', /json/);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toBeTruthy();
+    expect(response.body).toHaveProperty('message', 'User update successfully');
+
+    response = await request(app)
+      .get(`/admin/user/${data.nickname}`)
+      .set('Cookie', [`token=${token}`])
+      .expect('Content-Type', /json/);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toBeTruthy();
+    expect(response.body).toMatchSchema(userSchema);
+    expect(response.body.nickname).toBe(data.nickname.toLowerCase());
+    expect(response.body.display_name).toBe(data.nickname);
+    expect(response.body.email).toBe((data.email || '').toLowerCase());
+    expect(response.body.password).toBe(undefined);
+
+    /* Update permission */
+    data.permission = 'admin';
+    data.email = undefined;
+
+    response = await request(app)
+      .patch(`/admin/user/${data.nickname}`)
+      .send({ ...data, nickname: undefined })
+      .set('Cookie', [`token=${token}`])
+      .expect('Content-Type', /json/);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toBeTruthy();
+    expect(response.body).toHaveProperty('message', 'User update successfully');
+
+    response = await request(app)
+      .get(`/admin/user/${data.nickname}`)
+      .set('Cookie', [`token=${token}`])
+      .expect('Content-Type', /json/);
+
+    expect(response.statusCode).toBe(200);
     expect(response.body).toBeTruthy();
     expect(response.body).toMatchSchema(userSchema);
     expect(response.body.password).toBe(undefined);
-
-    console.log(response.body);
-  }); */
+    expect(response.body.nickname).toBe(data.nickname.toLowerCase());
+    expect(response.body.display_name).toBe(data.nickname);
+    expect(response.body.permission).toBe(
+      (data.permission || '').toLowerCase()
+    );
+  });
 });

@@ -16,7 +16,7 @@ routes.get('/', AppController.index);
 /* Admin Users Routes */
 routes.get('/admin/users', AdminUsersController.show);
 routes.get('/admin/user', AdminUsersController.index);
-routes.get('/admin/user/:nickname', AdminUsersController.index);
+routes.get('/admin/user/:id', AdminUsersController.index);
 routes.post('/admin/user', AdminUsersController.create);
 routes.patch('/admin/user', AdminUsersController.update);
 routes.patch('/admin/user/:id', AdminUsersController.update);

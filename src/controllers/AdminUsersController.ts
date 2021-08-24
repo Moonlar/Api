@@ -75,10 +75,11 @@ export const AdminUsersController = {
     if (!req.isAuth) return res.authError();
 
     // Pegar parâmetro nickname da url
-    const { nickname } = req.params as { nickname?: string };
+    let { id } = req.params as { id?: string };
+    id = id?.toLowerCase();
 
     // Verificar se ele tem permissão para acessar estes dados
-    if (nickname && req.user!.permission !== 'manager')
+    if (id && req.user!.permission !== 'manager')
       return res
         .status(401)
         .json({ error: 'You do not have permission to access this feature' });
@@ -86,7 +87,7 @@ export const AdminUsersController = {
     // Buscar dados
     const user: AdminUserData = await conn('admin_users')
       .select('*')
-      .where('nickname', nickname ? nickname.toLowerCase() : req.user!.nickname)
+      .where('nickname', id ? id : req.user!.nickname)
       .first();
 
     // Retornar erro caso não tenha encontrado
@@ -155,16 +156,17 @@ export const AdminUsersController = {
 
   async update(req, res) {
     // Se não estiver conectado
-    if (!req.isAuth) res.authError();
+    if (!req.isAuth) return res.authError();
 
     // Pegar id dos parâmetros de rota
-    const { id } = req.params as { id?: string };
+    let { id } = req.params as { id?: string };
+    id = id?.toLocaleLowerCase();
 
     // Verificar se tem permissão para executar
-    if (id && req.user!.permission !== 'manager')
+    if (req.user!.permission !== 'manager')
       return res
         .status(401)
-        .json({ error: 'You do not have permission to access this feature.' });
+        .json({ error: 'You do not have permission to access this feature' });
 
     // Pegar dados do corpo da requisição
     let { nickname, email, permission } = req.body as UpdateAdminUserData;
@@ -215,9 +217,9 @@ export const AdminUsersController = {
     // Atualizar dados
     await conn('admin_users')
       .update(newData)
-      .where(id ? 'id' : 'nickname', id || req.user!.nickname);
+      .where('nickname', id || req.user!.nickname);
 
-    return res.status(200).json({ message: 'Successfully updated account' });
+    return res.status(200).json({ message: 'User update successfully' });
   },
 
   async delete(req, res) {
@@ -225,7 +227,8 @@ export const AdminUsersController = {
     if (!req.isAuth) return res.authError();
 
     // Pegar id dos parâmetros de rota
-    const { id } = req.params as { id?: string };
+    let { id } = req.params as { id?: string };
+    id = id?.toLowerCase();
 
     // Verificar se tem permissão para executar
     if (req.user!.permission !== 'manager')

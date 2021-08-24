@@ -12,7 +12,11 @@ export const CreateAdminUserSchema = yup.object().shape({
 });
 
 export const UpdateAdminUserSchema = yup.object().shape({
-  nickname: yup.string().min(4).max(20),
+  nickname: yup
+    .string()
+    .min(4)
+    .max(20)
+    .matches(/^[A-Za-z0-9_]+$/),
   email: yup.string().email(),
   permission: yup.string().oneOf(['admin', 'manager']),
 });
