@@ -15,8 +15,10 @@ const TOKEN_VALIDITY = 1000 * 60 * 60 * 2;
 
 export const AdminAuthController = {
   async index(req, res) {
+    // Se não estiver estiver
     if (!req.isAuth) return res.authError();
 
+    // Retornar dados da sessão
     return res.json({
       nickname: req.user!.nickname,
       permission: req.user!.permission,
@@ -24,16 +26,18 @@ export const AdminAuthController = {
   },
 
   async create(req, res) {
+    // Retornar erro se já estiver conectado
     if (req.isAuth)
       return res.status(401).json({
         error: 'You are already connected',
       });
 
+    // Dados de login
     let { email, password } = req.body as CreateAuthData;
     if (email) email = email.trim();
     if (password) password = password.trim();
 
-    // Fazer validação
+    // Validar dados
     try {
       AdminUserLogInSchema.validateSync(
         { email, password },
@@ -45,6 +49,7 @@ export const AdminAuthController = {
         .json({ error: 'Invalid body', errors: err.errors });
     }
 
+    // Verificar se o usuário existe
     const user: AdminUserData = await conn('admin_users')
       .select('*')
       .where('email', email)
@@ -53,15 +58,18 @@ export const AdminAuthController = {
 
     if (!user) return res.status(404).json({ message: 'User not exists' });
 
+    // Testar senha
     if (!Password.compare(user.password, String(password))) {
       return res.status(401).json({ error: 'Wrong password' });
     }
 
+    // Gerar token com dados do usuário
     const token = GenerateToken(TOKEN_VALIDITY, {
       nickname: user.nickname,
       permission: user.permission,
     });
 
+    // Retornar token em cookie
     res.cookie('token', token, {
       httpOnly: true,
       maxAge: TOKEN_VALIDITY,
@@ -72,8 +80,13 @@ export const AdminAuthController = {
   },
 
   async delete(req, res) {
+    // Se o usuário não estiver conectado
     if (!req.isAuth) return res.authError();
 
+    // Remover token da whitelist
+    /* TO-DO */
+
+    // Limpar cookie com token
     return res
       .cookie('token', '', {
         httpOnly: true,
