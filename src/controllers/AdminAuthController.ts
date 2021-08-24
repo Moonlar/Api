@@ -10,8 +10,8 @@ interface CreateAuthData {
   password?: string;
 }
 
-// (Segundos) * (Minutos) * (Horas) * (Dias)
-const ONE_WEEK = 1000 * 60 * 24 * 7;
+// (1 Segundo) (Segundos) * (Minutos) * (Horas)
+const TOKEN_VALIDITY = 1000 * 60 * 60 * 2;
 
 export const AdminAuthController = {
   async index(req, res) {
@@ -57,14 +57,14 @@ export const AdminAuthController = {
       return res.status(401).json({ error: 'Wrong password' });
     }
 
-    const token = GenerateToken(ONE_WEEK, {
+    const token = GenerateToken(TOKEN_VALIDITY, {
       nickname: user.nickname,
       permission: user.permission,
     });
 
     res.cookie('token', token, {
       httpOnly: true,
-      maxAge: ONE_WEEK,
+      maxAge: TOKEN_VALIDITY,
       secure: process.env.NODE_ENV === 'production',
     });
 
