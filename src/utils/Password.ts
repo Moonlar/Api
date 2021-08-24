@@ -19,9 +19,13 @@ export function compare(hashPassword: string, password: string): boolean {
 }
 
 export function random(length: number = 12): string {
-  return Array.from({ length })
+  const password = Array.from({ length })
     .map(() => CHARS[randomNumber(0, CHARS.length)])
     .join('');
+
+  console.log(password);
+
+  return password;
 }
 
 export default { hash, compare, random };

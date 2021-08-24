@@ -1,6 +1,7 @@
 import { Router } from 'express';
-import { AdminUsersController } from './controllers/AdminUsersController';
 
+import { AdminAuthController } from './controllers/AdminAuthController';
+import { AdminUsersController } from './controllers/AdminUsersController';
 import { AppController } from './controllers/AppController';
 import { Auth } from './middlewares/Auth';
 import { UnavailableRoute } from './utils/UnavailableRoute';
@@ -23,9 +24,9 @@ routes.patch('/admin/user/:id', AdminUsersController.update);
 routes.delete('/admin/user/:id', AdminUsersController.delete);
 
 /* Admin Auth Routes */
-routes.get('/admin/auth', UnavailableRoute);
-routes.post('/admin/auth', UnavailableRoute);
-routes.delete('/admin/auth', UnavailableRoute);
+routes.get('/admin/auth', AdminAuthController.index);
+routes.post('/admin/auth', AdminAuthController.create);
+routes.delete('/admin/auth', AdminAuthController.delete);
 
 /* Auth Routes */
 routes.get('/auth', UnavailableRoute);
