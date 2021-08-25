@@ -1,9 +1,15 @@
 import request from 'supertest';
 
 import app from '../../src/App';
+import { runMigrations, runSeeds } from '../../src/database/Connection';
 
 describe('GET /', () => {
-  it('should answer with a json', async () => {
+  beforeAll(async () => {
+    await runMigrations();
+    await runSeeds();
+  });
+
+  it('Deve retornar um json', async () => {
     const response = await request(app)
       .get('/')
       .expect('Content-Type', /json/)

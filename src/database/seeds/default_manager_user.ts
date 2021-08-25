@@ -8,7 +8,7 @@ export async function seed(knex: Knex): Promise<void> {
   // Check if default user exists
   const userExist = await knex('admin_users')
     .select('*')
-    .where('nickname', 'default')
+    .where('identifier', 'default')
     .first();
 
   if (userExist) return;

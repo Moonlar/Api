@@ -11,7 +11,7 @@
   "scripts": {
     "start": "set NODE_ENV=production&&node ./dist/Server.js",
     "dev": "set NODE_ENV=development&&ts-node-dev --respawn --transpile-only --ignore-watch node_modules --no-notify src/Server.ts",
-    "test": "set NODE_ENV=test&&jest -i",
+    "test": "set NODE_ENV=test&&jest -i --forceExit --detectOpenHandles",
     "build": "babel src --extensions \".js,.ts\" --out-dir dist --copy-files --no-copy-ignored",
     "knex:seed": "set NODE_ENV=development&&knex --knexfile knexfile.ts seed:run",
     "knex:migrate": "set NODE_ENV=development&&knex --knexfile knexfile.ts migrate:latest"
