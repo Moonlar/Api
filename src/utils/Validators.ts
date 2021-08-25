@@ -27,17 +27,17 @@ export const AdminUserLogInSchema = yup.object().shape({
 });
 
 export const CreateProductSchema = yup.object().shape({
-  title: yup.string().required().min(4).max(30),
-  description: yup.string().required().min(4).max(150),
-  image_url: yup.string().url(),
-  server: yup.string().required(),
+  title: yup.string().trim().required().min(4).max(30),
+  description: yup.string().trim().required().min(4).max(150),
+  image_url: yup.string().trim().url(),
+  server: yup.string().trim().required(),
   price: yup.number().required().min(1),
   benefits: yup
     .array()
     .of(
       yup.object().shape({
-        title: yup.string().required().min(4).max(30),
-        description: yup.string().required().min(4).max(60),
+        title: yup.string().trim().required().min(4).max(30),
+        description: yup.string().trim().required().min(4).max(60),
       })
     )
     .required(),
@@ -45,9 +45,9 @@ export const CreateProductSchema = yup.object().shape({
     .array()
     .of(
       yup.object().shape({
-        title: yup.string().required().min(4).max(30),
-        description: yup.string().required().min(4).max(60),
-        command: yup.string().required().min(4).max(60),
+        title: yup.string().trim().required().min(4).max(30),
+        description: yup.string().trim().required().min(4).max(60),
+        command: yup.string().trim().required().min(4).max(60),
       })
     )
     .required(),

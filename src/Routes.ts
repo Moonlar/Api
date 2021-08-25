@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { AdminAuthController } from './controllers/AdminAuthController';
 import { AdminUsersController } from './controllers/AdminUsersController';
 import { AppController } from './controllers/AppController';
+import { ProductsController } from './controllers/ProductsController';
 import { Auth } from './middlewares/Auth';
 import { UnavailableRoute } from './utils/UnavailableRoute';
 
@@ -34,11 +35,11 @@ routes.post('/auth', UnavailableRoute);
 routes.delete('/auth', UnavailableRoute);
 
 /* Products Routes */
-routes.get('/products', UnavailableRoute);
-routes.get('/product/:id', UnavailableRoute);
-routes.post('/product', UnavailableRoute);
-routes.patch('/product/:id', UnavailableRoute);
-routes.delete('/product/:id', UnavailableRoute);
+// routes.get('/products', ProductsController.show);
+// routes.get('/product/:id', ProductsController.index);
+routes.post('/product', ProductsController.create);
+// routes.patch('/product/:id', ProductsController.update);
+// routes.delete('/product/:id', ProductsController.delete);
 
 /* Coupons Routes */
 routes.get('/coupons', UnavailableRoute);
