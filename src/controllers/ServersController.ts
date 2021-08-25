@@ -12,17 +12,52 @@ interface CreateServerData {
 
 export const ServersController = {
   async show(req, res) {
-    const servers: ServerData[] = await conn('servers').select('*');
+    // Parâmetros de busca
+    let page = Number(req.query.page || '1');
+    let search = (req.query.search || '').toString();
+    const limit = 10;
 
-    if (req.isAuth && req.user?.permission === 'admin') {
-      return res.json(servers);
+    // Informações
+    const length = Number(
+      (await conn('servers').count('id'))[0]['count(`id`)']
+    );
+    const pages = Math.ceil(length / limit) || 1;
+
+    // Validar página de busca
+    if (isNaN(page) || page <= 0) page = 1;
+
+    if (page > pages) page = pages;
+
+    // Buscar dados
+    const servers: ServerData[] = await conn('servers')
+      .select('*')
+      .where('name', 'like', `%${search}%`)
+      .offset((page - 1) * limit)
+      .limit(limit);
+
+    // Se tiver permissão admin ou manager retornar dados sem formatar
+    if (req.isAuth && ['admin', 'manager'].includes(req.user!.permission)) {
+      return res.json({
+        page,
+        total_pages: pages,
+        total_servers: length,
+        limit,
+        servers: servers,
+      });
     }
 
+    // Retornar dados formatados
     const serializedServers = servers.filter(
       (server) => server.deleted_at === null
     );
 
-    return res.json(serializedServers);
+    return res.json({
+      page,
+      total_pages: pages,
+      total_servers: length,
+      limit,
+      servers: serializedServers,
+    });
   },
 
   async create(req, res) {
