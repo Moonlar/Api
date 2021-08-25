@@ -44,7 +44,7 @@ export const ProductsController = {
       server,
     };
 
-    let data = {} as ProductData;
+    let data: ProductData | undefined;
 
     try {
       CreateProductSchema.validateSync(bodyData, { abortEarly: false });

@@ -26,6 +26,11 @@ export const AdminUserLogInSchema = yup.object().shape({
   password: yup.string().required().min(6).max(20),
 });
 
+export const CreateServerSchema = yup.object().shape({
+  title: yup.string().trim().required().min(4).max(30),
+  description: yup.string().trim().required().min(4).max(150),
+});
+
 export const CreateProductSchema = yup.object().shape({
   title: yup.string().trim().required().min(4).max(30),
   description: yup.string().trim().required().min(4).max(150),

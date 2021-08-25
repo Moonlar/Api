@@ -32,7 +32,7 @@ interface AdminUserData {
   permission: 'admin' | 'manager';
   created_at: string;
   updated_at: string;
-  deleted_at: string;
+  deleted_at: string | null;
 }
 
 interface ProductData {
@@ -43,7 +43,7 @@ interface ProductData {
   price: number;
   created_at: string;
   updated_at: string;
-  deleted_at: string;
+  deleted_at: string | null;
 }
 
 interface BenefitData {
@@ -53,7 +53,7 @@ interface BenefitData {
   description: string;
   created_at: string;
   updated_at: string;
-  deleted_at: string;
+  deleted_at: string | null;
 }
 
 interface CommandData {
@@ -64,7 +64,7 @@ interface CommandData {
   command: string;
   created_at: string;
   updated_at: string;
-  deleted_at: string;
+  deleted_at: string | null;
 }
 
 interface CouponData {
@@ -77,7 +77,7 @@ interface CouponData {
   ends_at: string;
   created_at: string;
   updated_at: string;
-  deleted_at: string;
+  deleted_at: string | null;
 }
 
 interface PurchaseData {
@@ -90,7 +90,7 @@ interface PurchaseData {
   activated_at: string;
   created_at: string;
   updated_at: string;
-  deleted_at: string;
+  deleted_at: string | null;
 }
 
 interface PurchaseItemData {
@@ -99,7 +99,16 @@ interface PurchaseItemData {
   product_id: string;
   created_at: string;
   updated_at: string;
-  deleted_at: string;
+  deleted_at: string | null;
+}
+
+interface ServerData {
+  id: string;
+  title: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
 }
 
 interface TokenData {

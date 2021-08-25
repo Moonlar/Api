@@ -4,7 +4,10 @@ import { AdminAuthController } from './controllers/AdminAuthController';
 import { AdminUsersController } from './controllers/AdminUsersController';
 import { AppController } from './controllers/AppController';
 import { ProductsController } from './controllers/ProductsController';
+import { ServersController } from './controllers/ServersController';
+
 import { Auth } from './middlewares/Auth';
+
 import { UnavailableRoute } from './utils/UnavailableRoute';
 
 const routes = Router();
@@ -33,6 +36,13 @@ routes.delete('/admin/auth', AdminAuthController.delete);
 routes.get('/auth', UnavailableRoute);
 routes.post('/auth', UnavailableRoute);
 routes.delete('/auth', UnavailableRoute);
+
+/* Servers Routes */
+routes.get('/servers', ServersController.show);
+// routes.get('/server/:id', ServersController.index);
+routes.post('/server', ServersController.create);
+// routes.patch('/server/:id', ServersController.update);
+// routes.delete('/server/:id', ServersController.delete);
 
 /* Products Routes */
 // routes.get('/products', ProductsController.show);
