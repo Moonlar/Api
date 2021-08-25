@@ -60,6 +60,32 @@ export const ServersController = {
     });
   },
 
+  async index(req, res) {
+    // Parâmetros de busca
+    const { id } = req.params as { id: string };
+
+    // Buscar dados
+    const server: ServerData | undefined = await conn('servers')
+      .select('*')
+      .where('id', id)
+      .first();
+
+    // Caso não ache o servidor
+    if (!server) {
+      return res.status(404).json({ error: 'Server not found' });
+    }
+
+    // Se tiver permissão admin ou manager retornar dados sem formatar
+    // se não retornar 404
+    if (req.isAuth && ['admin', 'manager'].includes(req.user!.permission)) {
+      return res.json(server);
+    } else if (req.isAuth && server.deleted_at !== null) {
+      return res.status(404).json({ error: 'Server not found' });
+    }
+
+    return res.json(server);
+  },
+
   async create(req, res) {
     // Se não estiver conectado
     if (!req.isAuth) return res.authError();

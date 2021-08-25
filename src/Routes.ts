@@ -39,7 +39,7 @@ routes.delete('/auth', UnavailableRoute);
 
 /* Servers Routes */
 routes.get('/servers', ServersController.show);
-// routes.get('/server/:id', ServersController.index);
+routes.get('/server/:id', ServersController.index);
 routes.post('/server', ServersController.create);
 // routes.patch('/server/:id', ServersController.update);
 // routes.delete('/server/:id', ServersController.delete);
@@ -47,7 +47,7 @@ routes.post('/server', ServersController.create);
 /* Products Routes */
 // routes.get('/products', ProductsController.show);
 // routes.get('/product/:id', ProductsController.index);
-routes.post('/product', ProductsController.create);
+// routes.post('/product', ProductsController.create);
 // routes.patch('/product/:id', ProductsController.update);
 // routes.delete('/product/:id', ProductsController.delete);
 
