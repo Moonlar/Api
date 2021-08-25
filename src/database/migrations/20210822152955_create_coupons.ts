@@ -4,7 +4,7 @@ export async function up(knex: Knex): Promise<void> {
   return knex.schema.createTable('coupons', (table) => {
     table.string('id').primary();
     table.string('code').notNullable().unique();
-    table.string('title').notNullable();
+    table.string('name').notNullable();
     table.string('description').notNullable();
     table.float('discount').notNullable();
     table.timestamp('starts_at').notNullable();

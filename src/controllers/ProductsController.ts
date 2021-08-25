@@ -2,17 +2,17 @@ import { Controller, ProductData } from '../typings';
 import { CreateProductSchema } from '../utils/Validators';
 
 interface CreateProductData {
-  title: string;
+  name: string;
   description: string;
   image_url: string;
   server: string;
   price: number;
   benefits: {
-    title: string;
+    name: string;
     description: string;
   }[];
   commands: {
-    title: string;
+    name: string;
     description: string;
     command: string;
   }[];
@@ -31,11 +31,11 @@ export const ProductsController = {
         .status(401)
         .json({ error: 'You do not have permission to perform this action' });
 
-    const { title, benefits, commands, description, image_url, price, server } =
+    const { name, benefits, commands, description, image_url, price, server } =
       req.body as CreateProductData;
 
     const bodyData = {
-      title,
+      name,
       benefits,
       commands,
       description,

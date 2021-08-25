@@ -27,12 +27,13 @@ export const AdminUserLogInSchema = yup.object().shape({
 });
 
 export const CreateServerSchema = yup.object().shape({
-  title: yup.string().trim().required().min(4).max(30),
+  identifier: yup.string().trim().lowercase().required().min(4).max(30),
+  name: yup.string().trim().required().min(4).max(30),
   description: yup.string().trim().required().min(4).max(150),
 });
 
 export const CreateProductSchema = yup.object().shape({
-  title: yup.string().trim().required().min(4).max(30),
+  name: yup.string().trim().required().min(4).max(30),
   description: yup.string().trim().required().min(4).max(150),
   image_url: yup.string().trim().url(),
   server: yup.string().trim().required(),

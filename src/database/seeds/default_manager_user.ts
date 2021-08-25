@@ -15,8 +15,8 @@ export async function seed(knex: Knex): Promise<void> {
 
   const defaultUser = {
     id: uuid(),
-    nickname: 'default',
-    display_name: 'Default',
+    identifier: 'default',
+    nickname: 'Default',
     email: 'default@gmail.com',
     password: Password.hash('12345678'),
     permission: 'manager',

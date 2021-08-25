@@ -75,11 +75,11 @@ export const AdminUsersController = {
     if (!req.isAuth) return res.authError();
 
     // Pegar parâmetro nickname da url
-    let { id } = req.params as { id?: string };
-    id = id?.toLowerCase();
+    let { identifier } = req.params as { identifier?: string };
+    identifier = identifier?.toLowerCase();
 
     // Verificar se ele tem permissão para acessar estes dados
-    if (id && req.user!.permission !== 'manager')
+    if (identifier && req.user!.permission !== 'manager')
       return res
         .status(401)
         .json({ error: 'You do not have permission to access this feature' });
@@ -87,7 +87,7 @@ export const AdminUsersController = {
     // Buscar dados
     const user: AdminUserData = await conn('admin_users')
       .select('*')
-      .where('nickname', id ? id : req.user!.nickname)
+      .where('identifier', identifier ? identifier : req.user!.nickname)
       .first();
 
     // Retornar erro caso não tenha encontrado
@@ -113,7 +113,8 @@ export const AdminUsersController = {
     let { nickname, email } = req.body as CreateAdminUserData;
 
     // Remover espaços
-    (nickname = (nickname || '').trim()), (email = (email || '').trim());
+    if (nickname) nickname = nickname.trim();
+    if (email) email = email.trim();
 
     // Fazer validação
     try {
@@ -127,12 +128,15 @@ export const AdminUsersController = {
         .json({ error: 'Invalid body', errors: err.errors });
     }
 
+    nickname = nickname!;
+    email = email!;
+
     // Verificar se já existe um usuário com mesmo nickname/email
     const userAlreadyExist: AdminUserData | undefined = await conn(
       'admin_users'
     )
       .select('id')
-      .where('nickname', nickname.toLowerCase())
+      .where('identifier', nickname.toLowerCase())
       .orWhere('email', email.toLowerCase())
       .first();
 
@@ -142,14 +146,16 @@ export const AdminUsersController = {
     // Criar novo usuário
     const newUser = {
       id: uuid(),
-      nickname: nickname.toLowerCase(),
-      display_name: nickname,
+      identifier: nickname.toLowerCase(),
+      nickname: nickname,
       email: email.toLowerCase(),
       password: Password.hash(Password.random()),
       permission: 'admin',
     } as AdminUserData;
 
     await conn('admin_users').insert(newUser);
+
+    /* Send Email with password */
 
     return res.status(201).json({ message: 'User created successfully' });
   },
@@ -158,9 +164,9 @@ export const AdminUsersController = {
     // Se não estiver conectado
     if (!req.isAuth) return res.authError();
 
-    // Pegar id dos parâmetros de rota
-    let { id } = req.params as { id?: string };
-    id = id?.toLocaleLowerCase();
+    // Pegar identificador do usuário dos parâmetros de rota
+    let { identifier } = req.params as { identifier?: string };
+    identifier = identifier?.toLocaleLowerCase();
 
     // Verificar se tem permissão para executar
     if (req.user!.permission !== 'manager')
@@ -198,7 +204,7 @@ export const AdminUsersController = {
         'admin_users'
       )
         .select('id')
-        .where('nickname', nickname.toLowerCase())
+        .where('identifier', nickname.toLowerCase())
         .first();
 
       if (userAlreadyExist)
@@ -207,8 +213,8 @@ export const AdminUsersController = {
 
     // Novos dados para atualizar
     const newData = {
-      nickname: nickname ? nickname.toLowerCase() : undefined,
-      display_name: nickname,
+      identifier: nickname ? nickname.toLowerCase() : undefined,
+      nickname: nickname,
       permission,
       email,
       updated_at: conn.fn.now() as any,
@@ -217,7 +223,7 @@ export const AdminUsersController = {
     // Atualizar dados
     await conn('admin_users')
       .update(newData)
-      .where('nickname', id || req.user!.nickname);
+      .where('identifier', identifier || req.user!.nickname);
 
     return res.status(200).json({ message: 'User update successfully' });
   },
@@ -226,9 +232,9 @@ export const AdminUsersController = {
     // Se não estiver conectado
     if (!req.isAuth) return res.authError();
 
-    // Pegar id dos parâmetros de rota
-    let { id } = req.params as { id?: string };
-    id = id?.toLowerCase();
+    // Pegar identificador do usuário dos parâmetros de rota
+    let { identifier } = req.params as { identifier?: string };
+    identifier = identifier?.toLowerCase();
 
     // Verificar se tem permissão para executar
     if (req.user!.permission !== 'manager')
@@ -236,10 +242,10 @@ export const AdminUsersController = {
         .status(401)
         .json({ error: 'You do not have permission to access this feature' });
 
-    // Verificar se o usuário existe mesmo
+    // Verificar se o usuário existe
     const userExist: AdminUserData = await conn('admin_users')
       .select('*')
-      .where(id ? 'id' : 'nickname', id || req.user!.nickname)
+      .where('identifier', identifier || req.user!.nickname)
       .first();
 
     if (!userExist) return res.status(404).json({ error: 'User not found' });
@@ -247,10 +253,10 @@ export const AdminUsersController = {
     // Atualizar informações
     await conn('admin_users')
       .update({ updated_at: conn.fn.now(), deleted_at: conn.fn.now() })
-      .where('id', id || req.user!.nickname);
+      .where('identifier', identifier || req.user!.nickname);
 
     // Remover cookie com token
-    if (!id) {
+    if (!identifier) {
       res.cookie('token', '', {
         httpOnly: true,
         maxAge: 0,

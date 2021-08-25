@@ -52,7 +52,7 @@ export const ServersController = {
 
     const serverExists: ServerData | undefined = await conn('servers')
       .select('id')
-      .where('title', data.title)
+      .where('name', data.name)
       .first();
 
     if (serverExists)

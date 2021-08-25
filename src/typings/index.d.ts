@@ -25,8 +25,8 @@ interface Controller {
 
 interface AdminUserData {
   id: string;
+  identifier: string;
   nickname: string;
-  display_name: string;
   email: string;
   password: string;
   permission: 'admin' | 'manager';
@@ -37,10 +37,11 @@ interface AdminUserData {
 
 interface ProductData {
   id: string;
-  title: string;
+  name: string;
   description: string;
   image_url: string;
   price: number;
+  activated: boolean;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
@@ -49,7 +50,7 @@ interface ProductData {
 interface BenefitData {
   id: string;
   product_id: string;
-  title: string;
+  name: string;
   description: string;
   created_at: string;
   updated_at: string;
@@ -59,7 +60,7 @@ interface BenefitData {
 interface CommandData {
   id: string;
   product_id: string;
-  title: string;
+  name: string;
   description: string;
   command: string;
   created_at: string;
@@ -70,7 +71,7 @@ interface CommandData {
 interface CouponData {
   id: string;
   code: string;
-  title: string;
+  name: string;
   description: string;
   discount: number;
   stats_at: string;
@@ -104,7 +105,8 @@ interface PurchaseItemData {
 
 interface ServerData {
   id: string;
-  title: string;
+  identifier: string;
+  name: string;
   description: string;
   created_at: string;
   updated_at: string;

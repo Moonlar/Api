@@ -5,8 +5,8 @@ import Password from '../../src/utils/Password';
 
 export const user = {
   id: uuid(),
-  nickname: 'mxd_',
-  display_name: 'MxD_',
+  identifier: 'mxd_',
+  nickname: 'MxD_',
   email: 'mxd@gmail.com',
   password: Password.hash('12345678'),
   permission: 'user' as any,
@@ -14,8 +14,8 @@ export const user = {
 
 export const admin = {
   id: uuid(),
-  nickname: 'admin',
-  display_name: 'Admin',
+  identifier: 'admin',
+  nickname: 'Admin',
   email: 'admin@gmail.com',
   password: Password.hash('12345678'),
   permission: 'admin',
@@ -23,8 +23,8 @@ export const admin = {
 
 export const manager = {
   id: uuid(),
-  nickname: 'manager',
-  display_name: 'Manager',
+  identifier: 'manager',
+  nickname: 'Manager',
   email: 'manager@gmail.com',
   password: Password.hash('12345678'),
   permission: 'manager',

@@ -6,11 +6,11 @@ export const userSchema = {
       type: 'string',
       require: true,
     },
-    nickname: {
+    identifier: {
       type: 'string',
       require: true,
     },
-    display_name: {
+    nickname: {
       type: 'string',
       require: true,
     },

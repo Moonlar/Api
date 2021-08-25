@@ -21,11 +21,11 @@ routes.get('/', AppController.index);
 /* Admin Users Routes */
 routes.get('/admin/users', AdminUsersController.show);
 routes.get('/admin/user', AdminUsersController.index);
-routes.get('/admin/user/:id', AdminUsersController.index);
+routes.get('/admin/user/:identifier', AdminUsersController.index);
 routes.post('/admin/user', AdminUsersController.create);
 routes.patch('/admin/user', AdminUsersController.update);
-routes.patch('/admin/user/:id', AdminUsersController.update);
-routes.delete('/admin/user/:id', AdminUsersController.delete);
+routes.patch('/admin/user/:identifier', AdminUsersController.update);
+routes.delete('/admin/user/:identifier', AdminUsersController.delete);
 
 /* Admin Auth Routes */
 routes.get('/admin/auth', AdminAuthController.index);

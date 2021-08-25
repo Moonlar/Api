@@ -4,7 +4,7 @@ export async function up(knex: Knex): Promise<void> {
   return knex.schema.createTable('products_commands', (table) => {
     table.string('id').primary();
     table.string('product_id').notNullable();
-    table.string('title').notNullable();
+    table.string('name').notNullable();
     table.string('description').notNullable();
     table.string('command').notNullable();
     table.timestamp('created_at').defaultTo(knex.fn.now());

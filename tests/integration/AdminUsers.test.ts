@@ -89,7 +89,7 @@ describe('GET /admin/users', () => {
     expect(response.body).toBeTruthy();
     expect(response.body).toHaveProperty('page', 1);
     expect(response.body).toHaveProperty('total_pages', 1);
-    expect(response.body).toHaveProperty('total_users', 3);
+    expect(response.body).toHaveProperty('total_users', 4);
     expect(response.body).toHaveProperty('limit');
     expect(typeof response.body.limit).toBe('number');
     expect(response.body).toHaveProperty('users');
@@ -381,8 +381,8 @@ describe('GET /admin/users', () => {
     expect(response.body).toBeTruthy();
     expect(response.body).toMatchSchema(userSchema);
     expect(response.body.password).toBe(undefined);
-    expect(response.body.nickname).toBe(data.nickname.toLowerCase().trim());
-    expect(response.body.display_name).toBe(data.nickname.trim());
+    expect(response.body.identifier).toBe(data.nickname.toLowerCase().trim());
+    expect(response.body.nickname).toBe(data.nickname.trim());
     expect(response.body.email).toBe(data.email.trim());
   });
 
@@ -536,8 +536,8 @@ describe('GET /admin/users', () => {
     expect(response.statusCode).toBe(200);
     expect(response.body).toBeTruthy();
     expect(response.body).toMatchSchema(userSchema);
-    expect(response.body.nickname).toBe(data.nickname.toLowerCase());
-    expect(response.body.display_name).toBe(data.nickname);
+    expect(response.body.identifier).toBe(data.nickname.toLowerCase());
+    expect(response.body.nickname).toBe(data.nickname);
     expect(response.body.password).toBe(undefined);
 
     /* Update email */
@@ -561,8 +561,8 @@ describe('GET /admin/users', () => {
     expect(response.statusCode).toBe(200);
     expect(response.body).toBeTruthy();
     expect(response.body).toMatchSchema(userSchema);
-    expect(response.body.nickname).toBe(data.nickname.toLowerCase());
-    expect(response.body.display_name).toBe(data.nickname);
+    expect(response.body.identifier).toBe(data.nickname.toLowerCase());
+    expect(response.body.nickname).toBe(data.nickname);
     expect(response.body.email).toBe((data.email || '').toLowerCase());
     expect(response.body.password).toBe(undefined);
 
@@ -589,8 +589,8 @@ describe('GET /admin/users', () => {
     expect(response.body).toBeTruthy();
     expect(response.body).toMatchSchema(userSchema);
     expect(response.body.password).toBe(undefined);
-    expect(response.body.nickname).toBe(data.nickname.toLowerCase());
-    expect(response.body.display_name).toBe(data.nickname);
+    expect(response.body.identifier).toBe(data.nickname.toLowerCase());
+    expect(response.body.nickname).toBe(data.nickname);
     expect(response.body.permission).toBe(
       (data.permission || '').toLowerCase()
     );
