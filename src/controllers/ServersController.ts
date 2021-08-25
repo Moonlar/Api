@@ -6,7 +6,7 @@ import { CreateServerSchema } from '../utils/Validators';
 import { Controller, ServerData } from '../typings';
 
 interface CreateServerData {
-  title?: string;
+  name?: string;
   description?: string;
 }
 
@@ -61,18 +61,22 @@ export const ServersController = {
   },
 
   async create(req, res) {
+    // Se não estiver conectado
     if (!req.isAuth) return res.authError();
 
+    // Se não tiver permissão manager
     if (req.user?.permission !== 'manager')
       return res
         .status(401)
         .json({ error: 'You do not have permission to perform this action' });
 
-    const { title, description } = req.body as CreateServerData;
+    // Dados do corpo da requisição
+    const { name, description } = req.body as CreateServerData;
 
-    const bodyData = { title, description };
-    let data: ServerData | undefined;
+    const bodyData = { name, description, identifier: name?.toLowerCase() };
+    let data: ServerData | undefined; // Dados já validados e formatado
 
+    // Validar dados
     try {
       CreateServerSchema.validateSync(bodyData, { abortEarly: false });
 
@@ -83,16 +87,19 @@ export const ServersController = {
         .json({ error: 'Invalid body', errors: err.errors });
     }
 
+    // Caso o cast não funcione
     if (!data) return res.status(500).json({ error: 'Internal server error' });
 
+    // Verificar se o nome do servidor já está em uso
     const serverExists: ServerData | undefined = await conn('servers')
       .select('id')
-      .where('name', data.name)
+      .where('identifier', data.name.toLowerCase())
       .first();
 
     if (serverExists)
-      return res.status(401).json({ error: 'Server already exist' });
+      return res.status(401).json({ error: 'Server name in use' });
 
+    // Dados para inserir no banco de dados
     data = {
       ...data,
       id: uuid(),
@@ -100,6 +107,6 @@ export const ServersController = {
 
     await conn('servers').insert(data);
 
-    return res.status(201).json({ message: 'Criado' });
+    return res.status(201).json({ message: 'Server created successfully' });
   },
 } as Controller;
