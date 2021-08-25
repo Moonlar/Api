@@ -8,11 +8,13 @@ _needs authentication_
 
 ### Body
 
-```json
-{
-  "hello": "world"
-}
+```ts
+type RequestBody = {
+  key: string;
+};
 ```
+
+More routes documentation
 
 ### Query Params
 
@@ -28,10 +30,10 @@ _needs authentication_
 
 ### Response
 
-```json
-{
-  "hello": "world"
-}
+```ts
+type RequestBody = {
+  key: string;
+};
 ```
 
 # Rotas
@@ -42,17 +44,17 @@ Retorna dados sobre a aplicação.
 
 ### Response
 
-```json
-{
-  "environment": "test" | "development" | "production"
-}
+```ts
+type ResponseBody = {
+  environment: 'test' | 'development' | 'production';
+};
 ```
 
 ## GET _/admin/users_
 
 Retorna lista de usuários admin.
 
-_Precisa de autenticação_
+_Precisa de autenticação (Manager)_
 
 ### Query Params
 
@@ -63,20 +65,67 @@ _Precisa de autenticação_
 
 ### Response
 
-```json
-{
-  "page": "number",
-  "total_pages": "number",
-  "total_users": "number",
-  "limit": "number",
-  "users": {
-    "id": "uuid",
-    "nickname": "string",
-    "display_name": "string",
-    "permission": "string",
-    "created_at": "string",
-    "updated_at": "string",
-    "deleted_at": "string"
-  }[]
-}
+```ts
+type ResponseBody = {
+  key: string;
+  page: number;
+  total_pages: number;
+  total_users: number;
+  limit: number;
+  users: {
+    id: string; // uuid
+    nickname: string;
+    display_name: string;
+    permission: 'admin' | 'manager';
+    created_at: string;
+    updated_at: string;
+    deleted_at: null;
+  }[];
+};
+```
+
+## GET _/admin/user_
+
+Retorna lista de usuários admin.
+
+_Precisa de autenticação_
+
+### Response
+
+```ts
+type ResponseBody = {
+  id: string; // uuid
+  nickname: string;
+  display_name: string;
+  permission: 'admin' | 'manager';
+  created_at: string;
+  updated_at: string;
+  deleted_at: null;
+};
+```
+
+## GET _/admin/user/:nickname_
+
+Retorna lista de usuários admin.
+
+_Precisa de autenticação (Manager)_
+
+### Route Params
+
+|   Name    |     Description     |
+| :-------: | :-----------------: |
+| :nickname | Nickname do usuário |
+
+### Response
+
+```ts
+type ResponseBody = {
+  id: string; // uuid
+  nickname: string;
+  display_name: string;
+  permission: 'admin' | 'manager';
+  created_at: string;
+  updated_at: string;
+  deleted_at: null;
+};
 ```
