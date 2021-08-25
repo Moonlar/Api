@@ -65,7 +65,7 @@ export const AdminAuthController = {
 
     // Gerar token com dados do usuário
     const token = GenerateToken(TOKEN_VALIDITY, {
-      nickname: user.nickname,
+      nickname: user.nickname.toLowerCase(),
       permission: user.permission,
     });
 

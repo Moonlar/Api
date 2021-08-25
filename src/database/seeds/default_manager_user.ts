@@ -5,7 +5,8 @@ import { AdminUserData } from '../../typings';
 import Password from '../../utils/Password';
 
 export async function seed(knex: Knex): Promise<void> {
-  // Check if default user exists
+  // Verificar se o usuário padrão já foi criado
+  /* TO-DO: Alterar modo de verificação para count */
   const userExist = await knex('admin_users')
     .select('*')
     .where('identifier', 'default')

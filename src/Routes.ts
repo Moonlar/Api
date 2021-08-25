@@ -5,6 +5,7 @@ import { AdminUsersController } from './controllers/AdminUsersController';
 import { AppController } from './controllers/AppController';
 import { ProductsController } from './controllers/ProductsController';
 import { ServersController } from './controllers/ServersController';
+import { TestsController } from './controllers/TestsController';
 
 import { Auth } from './middlewares/Auth';
 
@@ -66,6 +67,6 @@ routes.patch('/purchase/:id', UnavailableRoute);
 routes.delete('/purchase/:id', UnavailableRoute);
 
 /* Test Routes */
-routes.get('/token/:permission', UnavailableRoute);
+routes.get('/test/token/:level', TestsController.create);
 
 export default routes;

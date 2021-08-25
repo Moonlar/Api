@@ -6,5 +6,5 @@ export default {
   coverageDirectory: 'coverage',
   coverageProvider: 'v8',
   preset: 'ts-jest',
-  testMatch: ['**/tests/**/*.test.ts'],
+  testMatch: ['**/__tests__/**/*.test.ts'],
 } as Config.InitialOptions;

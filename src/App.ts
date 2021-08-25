@@ -9,7 +9,7 @@ import Routes from './Routes';
 
 const app = express();
 
-if (process.env.NODE_ENV !== 'test') app.use(morgan('tiny'));
+/* if (process.env.NODE_ENV !== 'test')  */ app.use(morgan('tiny'));
 app.use(cookieParser());
 app.use(
   cors({
