@@ -2,6 +2,7 @@ import { v4 as uuid } from 'uuid';
 
 import conn from '../database/Connection';
 import { CreateProductSchema } from '../utils/Validators';
+import { Errors, Success } from '../utils/Response';
 
 import { BenefitData, CommandData, Controller, ProductData } from '../typings';
 
@@ -33,9 +34,7 @@ export const ProductsController = {
 
     // Verificar se tem permissão
     if (req.user?.permission !== 'manager')
-      return res
-        .status(401)
-        .json({ error: 'You do not have permission to perform this action' });
+      return res.status(401).json({ error: Errors.NO_PERMISSION });
 
     // Dados da requisição
     const { name, benefits, commands, description, image_url, price, server } =
@@ -62,11 +61,11 @@ export const ProductsController = {
     } catch (err) {
       return res
         .status(400)
-        .json({ error: 'Invalid body', errors: err.errors });
+        .json({ error: Errors.INVALID_REQUEST, errors: err.errors });
     }
 
     // Se o cast dos dados falhar
-    if (!data) return res.status(500).json({ error: 'Internal server error' });
+    if (!data) return res.status(500).json({ error: Errors.INTERNAL_ERROR });
 
     // Dados a serem inseridos
     const productData = {
@@ -98,6 +97,6 @@ export const ProductsController = {
       trx('products_commands').insert(commandsData),
     ]);
 
-    return res.status(201).json({ message: 'Product created' });
+    return res.status(201).json({ message: Success.CREATED });
   },
 } as Controller;

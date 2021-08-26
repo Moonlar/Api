@@ -1,9 +1,11 @@
 import conn from '../database/Connection';
 
-import { AdminUserData, Controller } from '../typings';
-import { GenerateToken } from '../utils/GenerateToken';
 import Password from '../utils/Password';
+import { GenerateToken } from '../utils/GenerateToken';
+import { Errors, Success } from '../utils/Response';
 import { AdminUserLogInSchema } from '../utils/Validators';
+
+import { AdminUserData, Controller } from '../typings';
 
 interface CreateAuthData {
   email?: string;
@@ -29,7 +31,7 @@ export const AdminAuthController = {
     // Retornar erro se já estiver conectado
     if (req.isAuth)
       return res.status(401).json({
-        error: 'You are already connected',
+        error: Errors.NEED_LOGOUT,
       });
 
     // Dados de login
@@ -46,7 +48,7 @@ export const AdminAuthController = {
     } catch (err) {
       return res
         .status(400)
-        .json({ error: 'Invalid body', errors: err.errors });
+        .json({ error: Errors.INVALID_REQUEST, errors: err.errors });
     }
 
     // Verificar se o usuário existe
@@ -56,11 +58,11 @@ export const AdminAuthController = {
       .where('deleted_at', null)
       .first();
 
-    if (!user) return res.status(404).json({ error: 'User not exists' });
+    if (!user) return res.status(404).json({ error: Errors.NOT_FOUND });
 
     // Testar senha
     if (!Password.compare(user.password, String(password))) {
-      return res.status(401).json({ error: 'Wrong password' });
+      return res.status(401).json({ error: Errors.WRONG_PASSWORD });
     }
 
     // Gerar token com dados do usuário
@@ -76,7 +78,7 @@ export const AdminAuthController = {
       secure: process.env.NODE_ENV === 'production',
     });
 
-    return res.status(201).json({ message: 'Successfully logged in' });
+    return res.status(201).json({ message: Success.LOGIN });
   },
 
   async delete(req, res) {
@@ -93,6 +95,6 @@ export const AdminAuthController = {
         maxAge: 0,
         secure: process.env.NODE_ENV === 'production',
       })
-      .json({ message: 'You disconnected' });
+      .json({ message: Success.LOGOUT });
   },
 } as Controller;

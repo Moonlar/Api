@@ -2,6 +2,7 @@ import { v4 as uuid } from 'uuid';
 
 import conn from '../database/Connection';
 import { CreateServerSchema } from '../utils/Validators';
+import { Errors, Success } from '../utils/Response';
 
 import { Controller, ServerData } from '../typings';
 
@@ -86,7 +87,7 @@ export const ServersController = {
 
     // Caso não ache o servidor
     if (!server) {
-      return res.status(404).json({ error: 'Server not found' });
+      return res.status(404).json({ error: Errors.NOT_FOUND });
     }
 
     // Se tiver permissão admin ou manager retornar dados sem formatar
@@ -94,7 +95,7 @@ export const ServersController = {
     if (req.isAuth && ['admin', 'manager'].includes(req.user!.permission)) {
       return res.json(server);
     } else if (req.isAuth && server.deleted_at !== null) {
-      return res.status(404).json({ error: 'Server not found' });
+      return res.status(404).json({ error: Errors.NOT_FOUND });
     }
 
     return res.json(server);
@@ -106,9 +107,7 @@ export const ServersController = {
 
     // Se não tiver permissão manager
     if (req.user?.permission !== 'manager')
-      return res
-        .status(401)
-        .json({ error: 'You do not have permission to perform this action' });
+      return res.status(401).json({ error: Errors.NO_PERMISSION });
 
     // Dados do corpo da requisição
     const { name, description } = req.body as CreateServerData;
@@ -124,11 +123,11 @@ export const ServersController = {
     } catch (err) {
       return res
         .status(400)
-        .json({ error: 'Invalid body', errors: err.errors });
+        .json({ error: Errors.INVALID_REQUEST, errors: err.errors });
     }
 
-    // Caso o cast não funcione
-    if (!data) return res.status(500).json({ error: 'Internal server error' });
+    // Caso o cast falhe
+    if (!data) return res.status(500).json({ error: Errors.INTERNAL_ERROR });
 
     // Verificar se o nome do servidor já está em uso
     const serverExists: ServerData | undefined = await conn('servers')
@@ -137,7 +136,7 @@ export const ServersController = {
       .first();
 
     if (serverExists)
-      return res.status(401).json({ error: 'Server name in use' });
+      return res.status(401).json({ error: Errors.INVALID_REQUEST });
 
     // Dados para inserir no banco de dados
     data = {
@@ -147,7 +146,7 @@ export const ServersController = {
 
     await conn('servers').insert(data);
 
-    return res.status(201).json({ message: 'Server created successfully' });
+    return res.status(201).json({ message: Success.CREATED });
   },
 
   async delete(req, res) {
@@ -156,9 +155,7 @@ export const ServersController = {
 
     // Verificar se tem permissão para executar
     if (req.user!.permission !== 'manager')
-      return res
-        .status(401)
-        .json({ error: 'You do not have permission to access this feature' });
+      return res.status(401).json({ error: Errors.NO_PERMISSION });
 
     const { id } = req.params as { id: string };
 
@@ -168,14 +165,13 @@ export const ServersController = {
       .where('id', id)
       .first();
 
-    if (!serverExist)
-      return res.status(404).json({ error: 'Server not found' });
+    if (!serverExist) return res.status(404).json({ error: Errors.NOT_FOUND });
 
     // Atualizar informações
     await conn('servers')
       .update({ updated_at: conn.fn.now(), deleted_at: conn.fn.now() })
       .where('id', id);
 
-    return res.status(202).json({ message: 'Server successfully deleted' });
+    return res.status(202).json({ message: Success.DELETED });
   },
 } as Controller;

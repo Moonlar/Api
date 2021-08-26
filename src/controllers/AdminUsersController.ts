@@ -2,6 +2,7 @@ import { v4 as uuid } from 'uuid';
 
 import conn from '../database/Connection';
 import Password from '../utils/Password';
+import { Errors, Success } from '../utils/Response';
 import {
   CreateAdminUserSchema,
   UpdateAdminUserSchema,
@@ -27,9 +28,7 @@ export const AdminUsersController = {
 
     // Se o nível de permissão não for manager
     if (req.user!.permission !== 'manager')
-      return res
-        .status(401)
-        .json({ error: 'You do not have permission to access this' });
+      return res.status(401).json({ error: Errors.NO_PERMISSION });
 
     // Parâmetros de busca
     let page = Number(req.query.page || '1');
@@ -80,9 +79,7 @@ export const AdminUsersController = {
 
     // Verificar se ele tem permissão para acessar estes dados
     if (identifier && req.user!.permission !== 'manager')
-      return res
-        .status(401)
-        .json({ error: 'You do not have permission to access this feature' });
+      return res.status(401).json({ error: Errors.NO_PERMISSION });
 
     // Buscar dados
     const user: AdminUserData = await conn('admin_users')
@@ -91,7 +88,7 @@ export const AdminUsersController = {
       .first();
 
     // Retornar erro caso não tenha encontrado
-    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!user) return res.status(404).json({ error: Errors.NOT_FOUND });
 
     // Remover campos sensíveis
     const serializedUser = { ...user, password: undefined };
@@ -105,9 +102,7 @@ export const AdminUsersController = {
 
     // Verificar se tem permissão
     if (req.user!.permission !== 'manager')
-      return res
-        .status(401)
-        .json({ error: 'You do not have permission to perform this action' });
+      return res.status(401).json({ error: Errors.NO_PERMISSION });
 
     // Pegar dados do body
     let { nickname, email } = req.body as CreateAdminUserData;
@@ -125,7 +120,7 @@ export const AdminUsersController = {
     } catch (err) {
       return res
         .status(400)
-        .json({ error: 'Invalid body', errors: err.errors });
+        .json({ error: Errors.INVALID_REQUEST, errors: err.errors });
     }
 
     nickname = nickname!;
@@ -141,7 +136,7 @@ export const AdminUsersController = {
       .first();
 
     if (userAlreadyExist)
-      return res.status(401).json({ error: 'User already exist' });
+      return res.status(401).json({ error: Errors.INVALID_REQUEST });
 
     // Criar novo usuário
     const newUser = {
@@ -157,7 +152,7 @@ export const AdminUsersController = {
 
     /* Send Email with password */
 
-    return res.status(201).json({ message: 'User created successfully' });
+    return res.status(201).json({ message: Success.CREATED });
   },
 
   async update(req, res) {
@@ -170,16 +165,14 @@ export const AdminUsersController = {
 
     // Verificar se tem permissão para executar
     if (req.user!.permission !== 'manager')
-      return res
-        .status(401)
-        .json({ error: 'You do not have permission to access this feature' });
+      return res.status(401).json({ error: Errors.NO_PERMISSION });
 
     // Pegar dados do corpo da requisição
     let { nickname, email, permission } = req.body as UpdateAdminUserData;
 
     // Retornar erro caso não tenha dados para atualizar
     if (!nickname && !email && !permission)
-      return res.status(400).json({ error: 'No data to update' });
+      return res.status(400).json({ error: Errors.INVALID_REQUEST });
 
     // Remover espaços
     if (nickname) nickname = nickname.trim();
@@ -195,7 +188,7 @@ export const AdminUsersController = {
     } catch (err) {
       return res
         .status(400)
-        .json({ error: 'Invalid body', errors: err.errors });
+        .json({ error: Errors.INVALID_REQUEST, errors: err.errors });
     }
 
     // Verificar disponibilidade do nickname
@@ -208,7 +201,7 @@ export const AdminUsersController = {
         .first();
 
       if (userAlreadyExist)
-        return res.status(401).json({ error: 'Nickname already exist' });
+        return res.status(401).json({ error: Errors.INVALID_REQUEST });
     }
 
     // Novos dados para atualizar
@@ -225,7 +218,7 @@ export const AdminUsersController = {
       .update(newData)
       .where('identifier', identifier || req.user!.nickname);
 
-    return res.status(200).json({ message: 'User update successfully' });
+    return res.status(200).json({ message: Success.UPDATED });
   },
 
   async delete(req, res) {
@@ -238,9 +231,7 @@ export const AdminUsersController = {
 
     // Verificar se tem permissão para executar
     if (req.user!.permission !== 'manager')
-      return res
-        .status(401)
-        .json({ error: 'You do not have permission to access this feature' });
+      return res.status(401).json({ error: Errors.NO_PERMISSION });
 
     // Verificar se o usuário existe
     const userExist: AdminUserData = await conn('admin_users')
@@ -248,7 +239,7 @@ export const AdminUsersController = {
       .where('identifier', identifier || req.user!.nickname)
       .first();
 
-    if (!userExist) return res.status(404).json({ error: 'User not found' });
+    if (!userExist) return res.status(404).json({ error: Errors.NOT_FOUND });
 
     // Atualizar informações
     await conn('admin_users')
@@ -267,6 +258,6 @@ export const AdminUsersController = {
     // Adicionar token a blacklist
     /* To-Do */
 
-    return res.status(202).json({ message: 'Account successfully deleted' });
+    return res.status(202).json({ message: Success.DELETED });
   },
 } as Controller;

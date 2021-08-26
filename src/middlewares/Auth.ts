@@ -2,12 +2,11 @@ import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
 import { TokenData } from '../typings';
+import { Errors } from '../utils/Response';
 
 export const Auth = async (req: Request, res: Response, next: NextFunction) => {
   async function authError() {
-    return res
-      .status(401)
-      .json({ error: 'You need to be authenticated to access this feature' });
+    return res.status(401).json({ error: Errors.NEED_AUTHENTICATE });
   }
 
   async function validateToken(token: string) {
@@ -37,15 +36,15 @@ export const Auth = async (req: Request, res: Response, next: NextFunction) => {
     } catch (err) {
       switch (err.message) {
         case 'jwt expired' || 'jwt not active':
-          res.status(401).json({ error: 'Session expired' });
+          res.status(401).json({ error: Errors.EXPIRED_TOKEN });
           break;
 
         case 'jwt malformed':
-          res.status(401).json({ error: 'Invalid session token' });
+          res.status(401).json({ error: Errors.INVALID_TOKEN });
           break;
 
         default:
-          res.status(500).json({ error: 'Internal Server Error' });
+          res.status(500).json({ error: Errors.INTERNAL_ERROR });
           break;
       }
     }

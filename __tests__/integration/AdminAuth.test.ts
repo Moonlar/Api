@@ -4,6 +4,7 @@ import { matchers } from 'jest-json-schema';
 import app from '../../src/App';
 import { runMigrations, runSeeds } from '../../src/database/Connection';
 import { createDefaultUsers } from '../utils/data';
+import { Errors, Success } from '../../src/utils/Response';
 
 expect.extend(matchers);
 
@@ -32,10 +33,7 @@ describe('Admin Auth Routes', () => {
       expect(response.headers).toBeTruthy();
       expect(response.headers['content-type']).toMatch(/json/);
       expect(response.body).toBeTruthy();
-      expect(response.body).toHaveProperty(
-        'error',
-        'You need to be authenticated to access this feature'
-      );
+      expect(response.body).toHaveProperty('error', Errors.NEED_AUTHENTICATE);
     });
 
     it('(User) Deve retornar dados válidos', async () => {
@@ -80,10 +78,7 @@ describe('Admin Auth Routes', () => {
       expect(response.headers).toBeTruthy();
       expect(response.headers['content-type']).toMatch(/json/);
       expect(response.body).toBeTruthy();
-      expect(response.body).toHaveProperty(
-        'error',
-        'You are already connected'
-      );
+      expect(response.body).toHaveProperty('error', Errors.NEED_LOGOUT);
     });
 
     it('(Admin) Deve retornar que não pode estar conectado', async () => {
@@ -93,10 +88,7 @@ describe('Admin Auth Routes', () => {
       expect(response.headers).toBeTruthy();
       expect(response.headers['content-type']).toMatch(/json/);
       expect(response.body).toBeTruthy();
-      expect(response.body).toHaveProperty(
-        'error',
-        'You are already connected'
-      );
+      expect(response.body).toHaveProperty('error', Errors.NEED_LOGOUT);
     });
 
     it('(Manager) Deve retornar que não pode estar conectado', async () => {
@@ -106,10 +98,7 @@ describe('Admin Auth Routes', () => {
       expect(response.headers).toBeTruthy();
       expect(response.headers['content-type']).toMatch(/json/);
       expect(response.body).toBeTruthy();
-      expect(response.body).toHaveProperty(
-        'error',
-        'You are already connected'
-      );
+      expect(response.body).toHaveProperty('error', Errors.NEED_LOGOUT);
     });
 
     it('Deve retornar dados inválidos (sem dados)', async () => {
@@ -119,7 +108,7 @@ describe('Admin Auth Routes', () => {
       expect(response.headers).toBeTruthy();
       expect(response.headers['content-type']).toMatch(/json/);
       expect(response.body).toBeTruthy();
-      expect(response.body).toHaveProperty('error', 'Invalid body');
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
       expect(response.body).toHaveProperty('errors');
       expect(Array.isArray(response.body.errors)).toBe(true);
     });
@@ -133,7 +122,7 @@ describe('Admin Auth Routes', () => {
       expect(response.headers).toBeTruthy();
       expect(response.headers['content-type']).toMatch(/json/);
       expect(response.body).toBeTruthy();
-      expect(response.body).toHaveProperty('error', 'Invalid body');
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
       expect(response.body).toHaveProperty('errors');
       expect(Array.isArray(response.body.errors)).toBe(true);
     });
@@ -147,7 +136,7 @@ describe('Admin Auth Routes', () => {
       expect(response.headers).toBeTruthy();
       expect(response.headers['content-type']).toMatch(/json/);
       expect(response.body).toBeTruthy();
-      expect(response.body).toHaveProperty('error', 'Invalid body');
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
       expect(response.body).toHaveProperty('errors');
       expect(Array.isArray(response.body.errors)).toBe(true);
     });
@@ -161,7 +150,7 @@ describe('Admin Auth Routes', () => {
       expect(response.headers).toBeTruthy();
       expect(response.headers['content-type']).toMatch(/json/);
       expect(response.body).toBeTruthy();
-      expect(response.body).toHaveProperty('error', 'Invalid body');
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
       expect(response.body).toHaveProperty('errors');
       expect(Array.isArray(response.body.errors)).toBe(true);
     });
@@ -175,7 +164,7 @@ describe('Admin Auth Routes', () => {
       expect(response.headers).toBeTruthy();
       expect(response.headers['content-type']).toMatch(/json/);
       expect(response.body).toBeTruthy();
-      expect(response.body).toHaveProperty('error', 'Invalid body');
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
       expect(response.body).toHaveProperty('errors');
       expect(Array.isArray(response.body.errors)).toBe(true);
     });
@@ -189,7 +178,7 @@ describe('Admin Auth Routes', () => {
       expect(response.headers).toBeTruthy();
       expect(response.headers['content-type']).toMatch(/json/);
       expect(response.body).toBeTruthy();
-      expect(response.body).toHaveProperty('error', 'User not exists');
+      expect(response.body).toHaveProperty('error', Errors.NOT_FOUND);
     });
 
     it('Deve retornar senha incorreta', async () => {
@@ -201,7 +190,7 @@ describe('Admin Auth Routes', () => {
       expect(response.headers).toBeTruthy();
       expect(response.headers['content-type']).toMatch(/json/);
       expect(response.body).toBeTruthy();
-      expect(response.body).toHaveProperty('error', 'Wrong password');
+      expect(response.body).toHaveProperty('error', Errors.WRONG_PASSWORD);
     });
 
     it('Deve efetuar login', async () => {
@@ -214,7 +203,7 @@ describe('Admin Auth Routes', () => {
       expect(response.headers['content-type']).toMatch(/json/);
       expect(response.headers['set-cookie'].toString()).toMatch(/token=/);
       expect(response.body).toBeTruthy();
-      expect(response.body).toHaveProperty('message', 'Successfully logged in');
+      expect(response.body).toHaveProperty('message', Success.LOGIN);
     });
   });
 
@@ -226,10 +215,7 @@ describe('Admin Auth Routes', () => {
       expect(response.headers).toBeTruthy();
       expect(response.headers['content-type']).toMatch(/json/);
       expect(response.body).toBeTruthy();
-      expect(response.body).toHaveProperty(
-        'error',
-        'You need to be authenticated to access this feature'
-      );
+      expect(response.body).toHaveProperty('error', Errors.NEED_AUTHENTICATE);
     });
 
     it('(User) Deve efetuar logout', async () => {
@@ -240,7 +226,7 @@ describe('Admin Auth Routes', () => {
       expect(response.headers['content-type']).toMatch(/json/);
       expect(response.headers['set-cookie'].toString()).toMatch(/token=;/);
       expect(response.body).toBeTruthy();
-      expect(response.body).toHaveProperty('message', 'You disconnected');
+      expect(response.body).toHaveProperty('message', Success.LOGOUT);
     });
 
     it('(Admin) Deve efetuar logout', async () => {
@@ -251,7 +237,7 @@ describe('Admin Auth Routes', () => {
       expect(response.headers['content-type']).toMatch(/json/);
       expect(response.headers['set-cookie'].toString()).toMatch(/token=;/);
       expect(response.body).toBeTruthy();
-      expect(response.body).toHaveProperty('message', 'You disconnected');
+      expect(response.body).toHaveProperty('message', Success.LOGOUT);
     });
 
     it('(Manager) Deve efetuar logout', async () => {
@@ -262,7 +248,7 @@ describe('Admin Auth Routes', () => {
       expect(response.headers['content-type']).toMatch(/json/);
       expect(response.headers['set-cookie'].toString()).toMatch(/token=;/);
       expect(response.body).toBeTruthy();
-      expect(response.body).toHaveProperty('message', 'You disconnected');
+      expect(response.body).toHaveProperty('message', Success.LOGOUT);
     });
   });
 });

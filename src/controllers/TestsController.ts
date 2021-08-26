@@ -1,5 +1,7 @@
-import { Controller } from '../typings';
 import { GenerateToken } from '../utils/GenerateToken';
+import { Errors, Success } from '../utils/Response';
+
+import { Controller } from '../typings';
 
 const TOKEN_VALIDITY = 1000 * 60 * 60 * 2;
 
@@ -24,7 +26,7 @@ export const TestsController = {
   async create(req, res) {
     // Verificar ambiente
     if (process.env.NODE_ENV !== 'test')
-      return res.status(401).json({ error: 'Not authorized' });
+      return res.status(401).json({ error: Errors.NO_PERMISSION });
 
     // Pegar dados do usuário fake
     const { level } = req.params as { level: string };
@@ -32,7 +34,7 @@ export const TestsController = {
     const user = data[level];
 
     // Verificar se foi um nível de permissão válido
-    if (!user) return res.status(404).json({ error: 'Invalid level' });
+    if (!user) return res.status(404).json({ error: Errors.INVALID_REQUEST });
 
     // Gerar token com dados do usuário fake
     const token = GenerateToken(TOKEN_VALIDITY, {
@@ -47,6 +49,6 @@ export const TestsController = {
       secure: false,
     });
 
-    return res.json({ message: 'Successfully logged in' });
+    return res.json({ message: Success.LOGIN });
   },
 } as Controller;
