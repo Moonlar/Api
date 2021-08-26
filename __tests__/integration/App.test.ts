@@ -3,7 +3,7 @@ import { matchers } from 'jest-json-schema';
 
 import app from '../../src/App';
 import { runMigrations, runSeeds } from '../../src/database/Connection';
-import { createDefaultUsers } from '../utils/defaultUsers';
+import { createDefaultUsers } from '../utils/data';
 
 expect.extend(matchers);
 
@@ -15,13 +15,13 @@ describe('App Routes', () => {
   const managerAgent = supertest.agent(app);
 
   beforeAll(async () => {
-    await runMigrations();
-    await runSeeds();
-    await createDefaultUsers();
-
-    await userAgent.get('/test/token/user');
-    await adminAgent.get('/test/token/admin');
-    await managerAgent.get('/test/token/manager');
+    // await runMigrations();
+    // await runSeeds();
+    // await createDefaultUsers();
+    //
+    // await userAgent.get('/test/token/user');
+    // await adminAgent.get('/test/token/admin');
+    // await managerAgent.get('/test/token/manager');
   });
 
   describe('GET /', () => {

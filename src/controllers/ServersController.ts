@@ -17,9 +17,23 @@ export const ServersController = {
     let search = (req.query.search || '').toString();
     const limit = 10;
 
+    const isAdmin =
+      req.isAuth && ['admin', 'manager'].includes(req.user!.permission);
+
     // Informações
     const length = Number(
-      (await conn('servers').count('id'))[0]['count(`id`)']
+      isAdmin
+        ? (
+            await conn('servers')
+              .count('id')
+              .where('name', 'like', `%${search}%`)
+          )[0]['count(`id`)']
+        : (
+            await conn('servers')
+              .count('id')
+              .where('deleted_at', null)
+              .where('name', 'like', `%${search}%`)
+          )[0]['count(`id`)']
     );
     const pages = Math.ceil(length / limit) || 1;
 
@@ -36,7 +50,7 @@ export const ServersController = {
       .limit(limit);
 
     // Se tiver permissão admin ou manager retornar dados sem formatar
-    if (req.isAuth && ['admin', 'manager'].includes(req.user!.permission)) {
+    if (isAdmin) {
       return res.json({
         page,
         total_pages: pages,
