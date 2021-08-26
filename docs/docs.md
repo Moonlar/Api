@@ -6,7 +6,7 @@ Description.
 
 _needs authentication_
 
-### Body
+> Body
 
 ```ts
 type RequestBody = {
@@ -16,19 +16,19 @@ type RequestBody = {
 
 More routes documentation
 
-### Query Params
+> Query Params
 
 |  Name   |  Type  | Required |  Description   |
 | :-----: | :----: | :------: | :------------: |
 | Example | string |  false   | Just a example |
 
-### Route Params
+> Route Params
 
 |   Name   |  Description   |
 | :------: | :------------: |
 | :example | Just a example |
 
-### Response
+> Response
 
 ```ts
 type RequestBody = {
@@ -42,7 +42,7 @@ type RequestBody = {
 
 Retorna dados sobre a aplicação.
 
-### Response
+> Response
 
 ```ts
 type ResponseBody = {
@@ -56,14 +56,14 @@ Retorna lista de usuários admin.
 
 _Precisa de autenticação (Manager)_
 
-### Query Params
+> Query Params
 
 |  Name  |  Type  | Required |     Description     |
 | :----: | :----: | :------: | :-----------------: |
 |  page  | number |  false   |   Página de busca   |
 | search | string |  false   | Parâmetros de busca |
 
-### Response
+> Response
 
 ```ts
 type ResponseBody = {
@@ -86,11 +86,11 @@ type ResponseBody = {
 
 ## GET _/admin/user_
 
-Retorna lista de usuários admin.
+Retorna dados do usuário admin conectado.
 
 _Precisa de autenticação_
 
-### Response
+> Response
 
 ```ts
 type ResponseBody = {
@@ -106,17 +106,17 @@ type ResponseBody = {
 
 ## GET _/admin/user/:nickname_
 
-Retorna lista de usuários admin.
+Retorna dados de um usuário admin.
 
 _Precisa de autenticação (Manager)_
 
-### Route Params
+> Route Params
 
 |   Name    |     Description     |
 | :-------: | :-----------------: |
 | :nickname | Nickname do usuário |
 
-### Response
+> Response
 
 ```ts
 type ResponseBody = {
@@ -127,5 +127,28 @@ type ResponseBody = {
   created_at: string;
   updated_at: string;
   deleted_at: null;
+};
+```
+
+## POST _/admin/user/_
+
+Cria um novo usuário admin
+
+_Precisa de autenticação (Manager)_
+
+> Body
+
+```ts
+type RequestBody = {
+  nickname: string;
+  email: string;
+};
+```
+
+> Response
+
+```ts
+type ResponseBody = {
+  message: 'User created successfully';
 };
 ```
