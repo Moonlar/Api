@@ -297,3 +297,26 @@ type ResponseBody = {
   deleted_at: null | string; // Retorna string se tiver permissão Admin ou Manager
 };
 ```
+
+## POST _/server_
+
+Cria um novo servidor de relacionamento
+
+_Precisa de autenticação (Manager)_
+
+> Body
+
+```ts
+type RequestBody = {
+  name: string;
+  description: string;
+};
+```
+
+> Response
+
+```ts
+type ResponseBody = {
+  message: 'Successfully created';
+};
+```
