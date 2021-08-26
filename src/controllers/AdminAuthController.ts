@@ -56,7 +56,7 @@ export const AdminAuthController = {
       .where('deleted_at', null)
       .first();
 
-    if (!user) return res.status(404).json({ message: 'User not exists' });
+    if (!user) return res.status(404).json({ error: 'User not exists' });
 
     // Testar senha
     if (!Password.compare(user.password, String(password))) {
@@ -76,7 +76,7 @@ export const AdminAuthController = {
       secure: process.env.NODE_ENV === 'production',
     });
 
-    return res.json({ message: 'Successfully logged in' });
+    return res.status(201).json({ message: 'Successfully logged in' });
   },
 
   async delete(req, res) {
