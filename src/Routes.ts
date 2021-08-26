@@ -43,7 +43,7 @@ routes.get('/servers', ServersController.show);
 routes.get('/server/:id', ServersController.index);
 routes.post('/server', ServersController.create);
 // routes.patch('/server/:id', ServersController.update);
-// routes.delete('/server/:id', ServersController.delete);
+routes.delete('/server/:id', ServersController.delete);
 
 /* Products Routes */
 // routes.get('/products', ProductsController.show);
