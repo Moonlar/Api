@@ -3,7 +3,7 @@ import { matchers } from 'jest-json-schema';
 
 import app from '../../src/App';
 import { runMigrations, runSeeds } from '../../src/database/Connection';
-import { createDefaultUsers } from '../utils/defaultUsers';
+import { createDefaultUsers } from '../utils/data';
 
 expect.extend(matchers);
 

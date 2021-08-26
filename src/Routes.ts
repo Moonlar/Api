@@ -3,7 +3,6 @@ import { Router } from 'express';
 import { AdminAuthController } from './controllers/AdminAuthController';
 import { AdminUsersController } from './controllers/AdminUsersController';
 import { AppController } from './controllers/AppController';
-import { ProductsController } from './controllers/ProductsController';
 import { ServersController } from './controllers/ServersController';
 import { TestsController } from './controllers/TestsController';
 
@@ -42,15 +41,15 @@ routes.delete('/auth', UnavailableRoute);
 routes.get('/servers', ServersController.show);
 routes.get('/server/:id', ServersController.index);
 routes.post('/server', ServersController.create);
-// routes.patch('/server/:id', ServersController.update);
-// routes.delete('/server/:id', ServersController.delete);
+routes.patch('/server/:id', UnavailableRoute);
+routes.delete('/server/:id', ServersController.delete);
 
 /* Products Routes */
-// routes.get('/products', ProductsController.show);
-// routes.get('/product/:id', ProductsController.index);
-// routes.post('/product', ProductsController.create);
-// routes.patch('/product/:id', ProductsController.update);
-// routes.delete('/product/:id', ProductsController.delete);
+routes.get('/products', UnavailableRoute);
+routes.get('/product/:id', UnavailableRoute);
+routes.post('/product', UnavailableRoute);
+routes.patch('/product/:id', UnavailableRoute);
+routes.delete('/product/:id', UnavailableRoute);
 
 /* Coupons Routes */
 routes.get('/coupons', UnavailableRoute);

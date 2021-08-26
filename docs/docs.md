@@ -14,8 +14,6 @@ type RequestBody = {
 };
 ```
 
-More routes documentation
-
 > Query Params
 
 |  Name   |  Type  | Required |  Description   |
@@ -40,7 +38,7 @@ type RequestBody = {
 
 ## GET _/_
 
-Retorna dados sobre a aplicação.
+Retorna dados sobre a aplicação
 
 > Response
 
@@ -52,7 +50,7 @@ type ResponseBody = {
 
 ## GET _/admin/users_
 
-Retorna lista de usuários admin.
+Retorna lista de usuários admin
 
 _Precisa de autenticação (Manager)_
 
@@ -86,7 +84,7 @@ type ResponseBody = {
 
 ## GET _/admin/user_
 
-Retorna dados do usuário admin conectado.
+Retorna dados do usuário admin conectado
 
 _Precisa de autenticação_
 
@@ -104,17 +102,17 @@ type ResponseBody = {
 };
 ```
 
-## GET _/admin/user/:nickname_
+## GET _/admin/user/:identifier_
 
-Retorna dados de um usuário admin.
+Retorna dados de um usuário admin pelo nickname
 
 _Precisa de autenticação (Manager)_
 
 > Route Params
 
-|   Name    |     Description     |
-| :-------: | :-----------------: |
-| :nickname | Nickname do usuário |
+|    Name     |     Description     |
+| :---------: | :-----------------: |
+| :identifier | Nickname do usuário |
 
 > Response
 
@@ -150,5 +148,152 @@ type RequestBody = {
 ```ts
 type ResponseBody = {
   message: 'User created successfully';
+};
+```
+
+## PATCH _/admin/user_
+
+Atualizar dados de um usuário admin conectado
+
+_Precisa de autenticação (Admin | Manager)_
+
+> Body
+
+```ts
+type RequestBody = {
+  nickname: string;
+  email: string;
+  permission: 'admin' | 'manager';
+};
+```
+
+> Response
+
+```ts
+type ResponseBody = {
+  message: 'User update successfully';
+};
+```
+
+## PATCH _/admin/user/:identifier_
+
+Atualizar dados de um usuário admin pelo nickname
+
+_Precisa de autenticação (Manager)_
+
+> Route Params
+
+|    Name     |     Description     |
+| :---------: | :-----------------: |
+| :identifier | Nickname do usuário |
+
+> Body
+
+```ts
+type RequestBody = {
+  nickname: string;
+  email: string;
+  permission: 'admin' | 'manager';
+};
+```
+
+> Response
+
+```ts
+type ResponseBody = {
+  message: 'User update successfully';
+};
+```
+
+## DELETE _/admin/user_
+
+Deletar usuário admin conectado
+
+_Precisa de autenticação (Admin | Manager)_
+
+> Response
+
+```ts
+type ResponseBody = {
+  message: 'Account successfully deleted';
+};
+```
+
+## DELETE _/admin/user/:identifier_
+
+Deletar um usuário admin pelo nickname
+
+_Precisa de autenticação (Manager)_
+
+> Route Params
+
+|    Name     |     Description     |
+| :---------: | :-----------------: |
+| :identifier | Nickname do usuário |
+
+> Response
+
+```ts
+type ResponseBody = {
+  message: 'Account successfully deleted';
+};
+```
+
+## GET _/servers/_
+
+Buscar servidores de relacionado
+
+_Pode não estar autenticado_
+
+> Query Params
+
+|  Name  |  Type  | Required |     Description     |
+| :----: | :----: | :------: | :-----------------: |
+|  page  | number |  false   |   Página de busca   |
+| search | string |  false   | Parâmetros de busca |
+
+> Response
+
+```ts
+type ResponseBody = {
+  page: number;
+  total_pages: number;
+  total_servers: number;
+  limit: number;
+  servers: {
+    id: string;
+    identifier: string;
+    name: string;
+    description: string;
+    created_at: string;
+    updated_at: string;
+    deleted_at: null | string; // Retorna string se tiver permissão Admin ou Manager
+  }[];
+};
+```
+
+## GET _/server/:id_
+
+Buscar servidor de relacionado pelo seu id
+
+_Pode não estar autenticado_
+
+> Route Params
+
+| Name |            Description             |
+| :--: | :--------------------------------: |
+| :id  | ID do servidor que deseja retornar |
+
+> Response
+
+```ts
+type ResponseBody = {
+  id: string;
+  identifier: string;
+  name: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: null | string; // Retorna string se tiver permissão Admin ou Manager
 };
 ```

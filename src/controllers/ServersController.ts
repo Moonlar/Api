@@ -17,9 +17,23 @@ export const ServersController = {
     let search = (req.query.search || '').toString();
     const limit = 10;
 
+    const isAdmin =
+      req.isAuth && ['admin', 'manager'].includes(req.user!.permission);
+
     // Informações
     const length = Number(
-      (await conn('servers').count('id'))[0]['count(`id`)']
+      isAdmin
+        ? (
+            await conn('servers')
+              .count('id')
+              .where('name', 'like', `%${search}%`)
+          )[0]['count(`id`)']
+        : (
+            await conn('servers')
+              .count('id')
+              .where('deleted_at', null)
+              .where('name', 'like', `%${search}%`)
+          )[0]['count(`id`)']
     );
     const pages = Math.ceil(length / limit) || 1;
 
@@ -36,7 +50,7 @@ export const ServersController = {
       .limit(limit);
 
     // Se tiver permissão admin ou manager retornar dados sem formatar
-    if (req.isAuth && ['admin', 'manager'].includes(req.user!.permission)) {
+    if (isAdmin) {
       return res.json({
         page,
         total_pages: pages,
@@ -134,5 +148,34 @@ export const ServersController = {
     await conn('servers').insert(data);
 
     return res.status(201).json({ message: 'Server created successfully' });
+  },
+
+  async delete(req, res) {
+    // Se não estiver conectado
+    if (!req.isAuth) return res.authError();
+
+    // Verificar se tem permissão para executar
+    if (req.user!.permission !== 'manager')
+      return res
+        .status(401)
+        .json({ error: 'You do not have permission to access this feature' });
+
+    const { id } = req.params as { id: string };
+
+    // Verificar se o servidor existe
+    const serverExist: ServerData | undefined = await conn('servers')
+      .select('*')
+      .where('id', id)
+      .first();
+
+    if (!serverExist)
+      return res.status(404).json({ error: 'Server not found' });
+
+    // Atualizar informações
+    await conn('servers')
+      .update({ updated_at: conn.fn.now(), deleted_at: conn.fn.now() })
+      .where('id', id);
+
+    return res.status(202).json({ message: 'Server successfully deleted' });
   },
 } as Controller;

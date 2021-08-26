@@ -32,3 +32,30 @@ export const userSchema = {
     },
   },
 };
+
+export const serverSchema = {
+  $id: 'userTestSchema',
+  type: 'object',
+  properties: {
+    id: {
+      type: 'string',
+      require: true,
+    },
+    identifier: {
+      type: 'string',
+      require: true,
+    },
+    nickname: {
+      type: 'string',
+      require: true,
+    },
+    created_at: {
+      type: 'string',
+      require: true,
+    },
+    updated_at: {
+      type: 'string',
+      require: true,
+    },
+  },
+};
