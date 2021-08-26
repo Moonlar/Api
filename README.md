@@ -1,6 +1,6 @@
-<h1>🧪 Moonlar API</h1>
+<h1 align="center">🧪 Moonlar API</h1>
 
-Aqui você vai encontrar tudo que precisa para integrar com ela.
+Aqui você vai encontrar tudo que precisa para integrar com a Moonlar/Api.
 
 ## Instalação
 
@@ -18,7 +18,7 @@ cd Api
 ```sh
 yarn install
 
-or
+# or
 
 npm install
 ```
@@ -38,7 +38,7 @@ Você pode iniciar o servidor de desenvolvimento com
 ```sh
 yarn dev
 
-or
+# or
 
 npm run dev
 ```
