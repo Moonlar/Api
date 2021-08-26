@@ -38,7 +38,7 @@ type RequestBody = {
 
 ## GET _/_
 
-Retorna dados sobre a aplicação.
+Retorna dados sobre a aplicação
 
 > Response
 
@@ -50,7 +50,7 @@ type ResponseBody = {
 
 ## GET _/admin/users_
 
-Retorna lista de usuários admin.
+Retorna lista de usuários admin
 
 _Precisa de autenticação (Manager)_
 
@@ -84,7 +84,7 @@ type ResponseBody = {
 
 ## GET _/admin/user_
 
-Retorna dados do usuário admin conectado.
+Retorna dados do usuário admin conectado
 
 _Precisa de autenticação_
 
@@ -102,17 +102,17 @@ type ResponseBody = {
 };
 ```
 
-## GET _/admin/user/:nickname_
+## GET _/admin/user/:identifier_
 
-Retorna dados de um usuário admin.
+Retorna dados de um usuário admin pelo nickname
 
 _Precisa de autenticação (Manager)_
 
 > Route Params
 
-|   Name    |     Description     |
-| :-------: | :-----------------: |
-| :nickname | Nickname do usuário |
+|    Name     |     Description     |
+| :---------: | :-----------------: |
+| :identifier | Nickname do usuário |
 
 > Response
 
@@ -148,6 +148,94 @@ type RequestBody = {
 ```ts
 type ResponseBody = {
   message: 'User created successfully';
+};
+```
+
+## PATCH _/admin/user_
+
+Atualizar dados de um usuário admin conectado
+
+_Precisa de autenticação (Admin | Manager)_
+
+> Body
+
+```ts
+type RequestBody = {
+  nickname: string;
+  email: string;
+  permission: 'admin' | 'manager';
+};
+```
+
+> Response
+
+```ts
+type ResponseBody = {
+  message: 'User update successfully';
+};
+```
+
+## PATCH _/admin/user/:identifier_
+
+Atualizar dados de um usuário admin pelo nickname
+
+_Precisa de autenticação (Manager)_
+
+> Route Params
+
+|    Name     |     Description     |
+| :---------: | :-----------------: |
+| :identifier | Nickname do usuário |
+
+> Body
+
+```ts
+type RequestBody = {
+  nickname: string;
+  email: string;
+  permission: 'admin' | 'manager';
+};
+```
+
+> Response
+
+```ts
+type ResponseBody = {
+  message: 'User update successfully';
+};
+```
+
+## DELETE _/admin/user_
+
+Deletar usuário admin conectado
+
+_Precisa de autenticação (Admin | Manager)_
+
+> Response
+
+```ts
+type ResponseBody = {
+  message: 'Account successfully deleted';
+};
+```
+
+## DELETE _/admin/user/:identifier_
+
+Deletar um usuário admin pelo nickname
+
+_Precisa de autenticação (Manager)_
+
+> Route Params
+
+|    Name     |     Description     |
+| :---------: | :-----------------: |
+| :identifier | Nickname do usuário |
+
+> Response
+
+```ts
+type ResponseBody = {
+  message: 'Account successfully deleted';
 };
 ```
 
