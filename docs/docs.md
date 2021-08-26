@@ -14,8 +14,6 @@ type RequestBody = {
 };
 ```
 
-More routes documentation
-
 > Query Params
 
 |  Name   |  Type  | Required |  Description   |
@@ -150,5 +148,64 @@ type RequestBody = {
 ```ts
 type ResponseBody = {
   message: 'User created successfully';
+};
+```
+
+## GET _/servers/_
+
+Buscar servidores de relacionado
+
+_Pode não estar autenticado_
+
+> Query Params
+
+|  Name  |  Type  | Required |     Description     |
+| :----: | :----: | :------: | :-----------------: |
+|  page  | number |  false   |   Página de busca   |
+| search | string |  false   | Parâmetros de busca |
+
+> Response
+
+```ts
+type ResponseBody = {
+  page: number;
+  total_pages: number;
+  total_servers: number;
+  limit: number;
+  servers: {
+    id: string;
+    identifier: string;
+    name: string;
+    description: string;
+    created_at: string;
+    updated_at: string;
+    deleted_at: null | string; // Retorna string se tiver permissão Admin ou Manager
+  }[];
+};
+```
+
+## GET _/server/:id_
+
+Buscar servidor de relacionado pelo seu id
+
+_Pode não estar autenticado_
+
+> Route Params
+
+| Name |            Description             |
+| :--: | :--------------------------------: |
+| :id  | ID do servidor que deseja retornar |
+
+> Response
+
+```ts
+type ResponseBody = {
+  id: string;
+  identifier: string;
+  name: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: null | string; // Retorna string se tiver permissão Admin ou Manager
 };
 ```
