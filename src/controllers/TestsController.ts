@@ -25,7 +25,7 @@ const data: {
 export const TestsController = {
   async create(req, res) {
     // Verificar ambiente
-    if (process.env.NODE_ENV !== 'test')
+    if (process.env.NODE_ENV === 'production')
       return res.status(401).json({ error: Errors.NO_PERMISSION });
 
     // Pegar dados do usuário fake
