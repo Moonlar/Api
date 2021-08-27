@@ -31,10 +31,18 @@ export const userSchema = {
       require: true,
     },
   },
+  required: [
+    'id',
+    'identifier',
+    'nickname',
+    'permission',
+    'created_at',
+    'updated_at',
+  ],
 };
 
 export const serverSchema = {
-  $id: 'userTestSchema',
+  $id: 'serverTestSchema',
   type: 'object',
   properties: {
     id: {
@@ -45,7 +53,11 @@ export const serverSchema = {
       type: 'string',
       require: true,
     },
-    nickname: {
+    name: {
+      type: 'string',
+      require: true,
+    },
+    description: {
       type: 'string',
       require: true,
     },
@@ -58,4 +70,12 @@ export const serverSchema = {
       require: true,
     },
   },
+  required: [
+    'id',
+    'identifier',
+    'name',
+    'description',
+    'created_at',
+    'updated_at',
+  ],
 };
