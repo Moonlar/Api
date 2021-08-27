@@ -4,7 +4,13 @@ import conn from '../database/Connection';
 import { CreateProductSchema } from '../utils/Validators';
 import { Errors, Success } from '../utils/Response';
 
-import { BenefitData, CommandData, Controller, ProductData } from '../typings';
+import {
+  BenefitData,
+  CommandData,
+  Controller,
+  ProductData,
+  ServerData,
+} from '../typings';
 
 interface CreateProductData {
   name: string;
@@ -66,6 +72,15 @@ export const ProductsController = {
 
     // Se o cast dos dados falhar
     if (!data) return res.status(500).json({ error: Errors.INTERNAL_ERROR });
+
+    // Validar id do servidor de relacionamento
+    const serverExists: ServerData | undefined = await conn('servers')
+      .select('id')
+      .where('id', server)
+      .first();
+
+    if (!serverExists)
+      return res.json(404).json({ error: Errors.INVALID_REQUEST });
 
     // Dados a serem inseridos
     const productData = {
