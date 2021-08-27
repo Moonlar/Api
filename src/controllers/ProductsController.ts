@@ -31,53 +31,93 @@ interface CreateProductData {
 
 export const ProductsController = {
   async show(req, res) {
+    // Parâmetros de busca
+    let page = Number(req.query.page || '1');
+    let search = (req.query.search || '').toString();
+    const limit = 10;
+
     const isAdmin = ['admin', 'manager'].includes(req.user?.permission || '');
 
-    const products: ProductData[] = await conn('products').select('*');
+    // Informações
+    const length = Number(
+      isAdmin
+        ? (
+            await conn('products')
+              .count('id')
+              .where('name', 'like', `%${search}%`)
+              .where('deleted_at', null)
+          )[0]['count(`id`)']
+        : (
+            await conn('products')
+              .count('id')
+              .where('active', true)
+              .where('name', 'like', `%${search}%`)
+              .where('deleted_at', null)
+          )[0]['count(`id`)']
+    );
+    const pages = Math.ceil(length / limit) || 1;
+
+    // Validar página de busca
+    if (isNaN(page) || page <= 0) page = 1;
+
+    if (page > pages) page = pages;
+
+    // Buscar dados
+    const products: ProductData[] = await conn('products')
+      .select('*')
+      .where('deleted_at', null)
+      .where('name', 'like', `%${search}%`)
+      .whereIn('active', isAdmin ? [true, false] : [true])
+      .offset((page - 1) * limit)
+      .limit(limit);
+
+    // ID de todos os produtos e servidores para relacionamento
     const productsIds = products.map((product) => product.id);
     const serversIds = products.map((product) => product.server);
 
-    const benefits: BenefitData[] = await conn('products_benefits as pb')
-      .innerJoin('products as p', 'pb.product_id', 'p.id')
-      .select('pb.*')
-      .whereIn('pb.product_id', productsIds);
+    // Benefícios dos produtos
+    const benefits: BenefitData[] = await conn('products_benefits')
+      .select('*')
+      .whereIn('product_id', productsIds);
 
-    console.log(
-      conn('products_benefits as pb')
-        .innerJoin('products as p', 'pb.product_id', 'p.id')
-        .select('pb.*')
-        .whereIn('pb.product_id', productsIds)
-        .toQuery()
-    );
-
+    // Commandos de ativação dos produtos
     const commands: CommandData[] = isAdmin
-      ? await conn('products_commands as pc')
-          .innerJoin('products as p', 'pc.product_id', 'p.id')
-          .select('pc.*')
-          .whereIn('pc.product_id', productsIds)
+      ? await conn('products_commands')
+          .select('*')
+          .whereIn('product_id', productsIds)
       : [];
 
+    // Servidores dos produtos
     const servers: ServerData[] = await conn('servers')
       .select(['id', 'name', 'description'])
       .whereIn('id', serversIds);
 
+    // Formatar produtos
     const serializedProducts = products.map((product) => ({
       id: product.id,
       name: product.name,
       description: product.description,
       image_url: product.image_url,
+      price: product.price,
+      active: isAdmin ? product.active : undefined,
       server: servers.find((server) => server.id === product.server) || null,
       benefits: benefits.filter((benefit) => benefit.product_id === product.id),
       commands: isAdmin
         ? commands.filter((command) => command.product_id === product.id)
         : undefined,
-      price: product.price,
       created_at: product.created_at,
       updated_at: product.updated_at,
       deleted_at: product.deleted_at,
     }));
 
-    return res.json(serializedProducts);
+    // Retornar dados
+    return res.json({
+      page,
+      total_pages: pages,
+      total_products: length,
+      limit,
+      products: serializedProducts,
+    });
   },
 
   async index(req, res) {
@@ -130,7 +170,7 @@ export const ProductsController = {
       .first();
 
     if (!serverExists)
-      return res.json(404).json({ error: Errors.INVALID_REQUEST });
+      return res.status(404).json({ error: Errors.INVALID_REQUEST });
 
     // Dados a serem inseridos
     const productData = {
