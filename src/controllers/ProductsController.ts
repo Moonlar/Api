@@ -90,27 +90,42 @@ export const ProductsController = {
       price: data.price,
       image_url: data.image_url,
       server: data.server,
-      activated: false,
     } as ProductData;
 
     const benefitsData = data.benefits.map((benefit) => ({
       ...benefit,
       id: uuid(),
+      product_id: productData.id,
     })) as BenefitData[];
 
     const commandsData = data.commands.map((command) => ({
       ...command,
       id: uuid(),
+      product_id: productData.id,
     })) as CommandData[];
 
     // inserir dados
     const trx = await conn.transaction();
 
-    await Promise.all([
-      trx('products').insert(productData),
-      trx('products_benefits').insert(benefitsData),
-      trx('products_commands').insert(commandsData),
-    ]);
+    try {
+      await Promise.all([
+        conn('products').transacting(trx).insert(productData),
+        benefitsData.length > 0
+          ? conn('products_benefits').transacting(trx).insert(benefitsData)
+          : undefined,
+        commandsData.length > 0
+          ? conn('products_commands').transacting(trx).insert(commandsData)
+          : undefined,
+      ]);
+
+      await trx.commit();
+    } catch (err) {
+      await trx.rollback();
+
+      console.error(err);
+
+      return res.status(500).json({ error: Errors.INTERNAL_ERROR });
+    }
 
     return res.status(201).json({ message: Success.CREATED });
   },
