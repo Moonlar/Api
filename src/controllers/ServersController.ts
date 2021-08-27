@@ -11,6 +11,11 @@ interface CreateServerData {
   description?: string;
 }
 
+interface UpdateServerData {
+  name?: string;
+  description?: string;
+}
+
 export const ServersController = {
   async show(req, res) {
     // Parâmetros de busca
@@ -147,6 +152,28 @@ export const ServersController = {
     await conn('servers').insert(data);
 
     return res.status(201).json({ message: Success.CREATED });
+  },
+
+  async update(req, res) {
+    // Se não estiver conectado
+    if (!req.isAuth) return res.authError();
+
+    // Verificar permissões
+    if (req.user?.permission !== 'manager')
+      return res.status(401).json({ error: Errors.NO_PERMISSION });
+
+    // Dados para atualizar
+    const { name, description } = req.body as UpdateServerData;
+
+    // Se não for fornecido dados para atualizar
+    if (!name && !description)
+      return res.status(400).json({ error: Errors.INVALID_REQUEST });
+
+    // Validar dados
+
+    let data;
+
+    return res.json(null);
   },
 
   async delete(req, res) {
