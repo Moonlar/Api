@@ -3,8 +3,13 @@ import { matchers } from 'jest-json-schema';
 
 import app from '../../src/App';
 import { runMigrations, runSeeds } from '../../src/database/Connection';
-import { createDefaultServers, createDefaultUsers } from '../utils/data';
 import { serverSchema } from '../utils/schemas';
+import { Errors } from '../../src/utils/Response';
+import {
+  createDefaultServers,
+  createDefaultUsers,
+  serversData,
+} from '../utils/data';
 
 expect.extend(matchers);
 
@@ -26,7 +31,7 @@ describe('Server Routes', () => {
     await managerAgent.get('/test/token/manager');
   });
 
-  describe('GET /', () => {
+  describe('GET /servers', () => {
     it('Deve retornar dados válidos', async () => {
       const response = await request.get('/servers');
 
@@ -161,6 +166,68 @@ describe('Server Routes', () => {
         expect(server).toMatchSchema(serverSchema);
         expect(server.deleted_at).toBe(null);
       });
+    });
+  });
+
+  describe('GET /server/:id', () => {
+    it('Deve retornar dados válidos', async () => {
+      const response = await request.get(`/server/${serversData[1].id}`);
+
+      expect(response.statusCode).toBe(200);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toMatchSchema(serverSchema);
+    });
+
+    it('Deve retornar não encontrado com id inválido', async () => {
+      const response = await request.get(`/server/invalid`);
+
+      expect(response.statusCode).toBe(404);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NOT_FOUND);
+    });
+
+    it('Deve retornar não encontrado', async () => {
+      const response = await request.get(`/server/${serversData[0].id}`);
+
+      expect(response.statusCode).toBe(404);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NOT_FOUND);
+    });
+
+    it('(User) Deve retornar não encontrado', async () => {
+      const response = await userAgent.get(`/server/${serversData[0].id}`);
+
+      expect(response.statusCode).toBe(404);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NOT_FOUND);
+    });
+
+    it('(Admin) Deve retornar dados válidos', async () => {
+      const response = await adminAgent.get(`/server/${serversData[0].id}`);
+
+      expect(response.statusCode).toBe(200);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toMatchSchema(serverSchema);
+    });
+
+    it('(Manager) Deve retornar dados válidos', async () => {
+      const response = await managerAgent.get(`/server/${serversData[0].id}`);
+
+      expect(response.statusCode).toBe(200);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toMatchSchema(serverSchema);
     });
   });
 });

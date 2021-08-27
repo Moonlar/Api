@@ -99,7 +99,7 @@ export const ServersController = {
     // se não retornar 404
     if (req.isAuth && ['admin', 'manager'].includes(req.user!.permission)) {
       return res.json(server);
-    } else if (req.isAuth && server.deleted_at !== null) {
+    } else if (server.deleted_at !== null) {
       return res.status(404).json({ error: Errors.NOT_FOUND });
     }
 

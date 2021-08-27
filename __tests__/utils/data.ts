@@ -27,7 +27,7 @@ const usersData = [
   },
 ];
 
-const serversData = [
+export const serversData = [
   {
     id: uuid(),
     identifier: 'rankup',
