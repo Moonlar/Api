@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { AdminAuthController } from './controllers/AdminAuthController';
 import { AdminUsersController } from './controllers/AdminUsersController';
 import { AppController } from './controllers/AppController';
+import { ProductsController } from './controllers/ProductsController';
 import { ServersController } from './controllers/ServersController';
 import { TestsController } from './controllers/TestsController';
 
@@ -45,9 +46,9 @@ routes.patch('/server/:id', UnavailableRoute);
 routes.delete('/server/:id', ServersController.delete);
 
 /* Products Routes */
-routes.get('/products', UnavailableRoute);
+routes.get('/products', ProductsController.show);
 routes.get('/product/:id', UnavailableRoute);
-routes.post('/product', UnavailableRoute);
+routes.post('/product', ProductsController.create);
 routes.patch('/product/:id', UnavailableRoute);
 routes.delete('/product/:id', UnavailableRoute);
 

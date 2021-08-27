@@ -41,8 +41,8 @@ interface ProductData {
   description: string;
   image_url: string;
   server: string;
-  activated: boolean;
   price: number;
+  active: boolean;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;

@@ -42,7 +42,7 @@ export const CreateProductSchema = yup.object().shape({
     .array()
     .of(
       yup.object().shape({
-        title: yup.string().trim().required().min(4).max(30),
+        name: yup.string().trim().required().min(4).max(30),
         description: yup.string().trim().required().min(4).max(60),
       })
     )
@@ -51,7 +51,7 @@ export const CreateProductSchema = yup.object().shape({
     .array()
     .of(
       yup.object().shape({
-        title: yup.string().trim().required().min(4).max(30),
+        name: yup.string().trim().required().min(4).max(30),
         description: yup.string().trim().required().min(4).max(60),
         command: yup.string().trim().required().min(4).max(60),
       })
