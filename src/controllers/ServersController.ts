@@ -141,7 +141,10 @@ export const ServersController = {
     const { id } = req.params as { id: string };
 
     // Verificar se o servidor existe
-    const serverExists = await conn('servers').select('id').where('id', id);
+    const serverExists: { id: string } | undefined = await conn('servers')
+      .select('id')
+      .where('id', id)
+      .first();
 
     if (!serverExists) return res.status(404).json({ error: Errors.NOT_FOUND });
 
