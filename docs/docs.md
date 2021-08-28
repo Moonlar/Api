@@ -320,3 +320,52 @@ type ResponseBody = {
   message: 'Successfully created';
 };
 ```
+
+## PATCH _/server/:id_
+
+Atualiza dados de um servidor de relacionamento
+
+_Precisa de autenticação (Manager)_
+
+> Route Params
+
+| Name |             Description             |
+| :--: | :---------------------------------: |
+| :id  | ID do servidor que deseja atualizar |
+
+> Body
+
+```ts
+type RequestBody = {
+  name?: string;
+  description?: string;
+};
+```
+
+> Response
+
+```ts
+type ResponseBody = {
+  message: 'Successfully updated';
+};
+```
+
+## DELETE _/server/:id_
+
+Remove dados de um servidor de relacionamento
+
+_Precisa de autenticação (Manager)_
+
+> Route Params
+
+| Name |            Description            |
+| :--: | :-------------------------------: |
+| :id  | ID do servidor que deseja remover |
+
+> Response
+
+```ts
+type ResponseBody = {
+  message: 'Successfully deleted';
+};
+```
