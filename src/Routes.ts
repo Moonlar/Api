@@ -49,7 +49,7 @@ routes.delete('/server/:id', ServersController.delete);
 routes.get('/products', ProductsController.show);
 routes.get('/product/:id', ProductsController.index);
 routes.post('/product', ProductsController.create);
-routes.patch('/product/:id', UnavailableRoute);
+routes.patch('/product/:id', ProductsController.update);
 routes.delete('/product/:id', UnavailableRoute);
 
 /* Coupons Routes */

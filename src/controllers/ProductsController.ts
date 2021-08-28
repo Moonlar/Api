@@ -1,7 +1,7 @@
 import { v4 as uuid } from 'uuid';
 
 import conn from '../database/Connection';
-import { CreateProductSchema } from '../utils/Validators';
+import { CreateProductSchema, UpdateProductSchema } from '../utils/Validators';
 import { Errors, Success } from '../utils/Response';
 
 import {
@@ -23,6 +23,23 @@ interface CreateProductData {
     description: string;
   }[];
   commands: {
+    name: string;
+    command: string;
+  }[];
+}
+
+interface UpdateProductData {
+  name?: string;
+  description?: string;
+  image_url?: string;
+  server_id?: string;
+  price?: number;
+  active?: boolean;
+  benefits?: {
+    name: string;
+    description: string;
+  }[];
+  commands?: {
     name: string;
     command: string;
   }[];
@@ -276,5 +293,74 @@ export const ProductsController = {
     }
 
     return res.status(201).json({ message: Success.CREATED });
+  },
+
+  async update(req, res) {
+    // Se não estiver conectado
+    if (!req.isAuth) return res.authError();
+
+    // Verificar permissões
+    if (req.user?.permission !== 'manager')
+      return res.status(401).json({ error: Errors.NO_PERMISSION });
+
+    // Dados para atualizar
+    const { name, description, image_url, server_id, benefits, commands } =
+      req.body as UpdateProductData;
+
+    // Se não for fornecido dados para atualizar
+    if (
+      !name &&
+      !description &&
+      !image_url &&
+      !server_id &&
+      !benefits &&
+      !commands
+    )
+      return res.status(400).json({ error: Errors.INVALID_REQUEST });
+
+    const { id } = req.params as { id: string };
+
+    // Verificar se o servidor existe
+    const productExists: { id: string } | undefined = await conn('products')
+      .select('id')
+      .where('id', id)
+      .where('deleted_at', null)
+      .first();
+
+    if (!productExists)
+      return res.status(404).json({ error: Errors.NOT_FOUND });
+
+    // Validar dados
+    let data: UpdateProductData | undefined;
+
+    try {
+      UpdateProductSchema.validateSync(
+        { name, description, image_url, server_id, benefits, commands },
+        { abortEarly: false }
+      );
+
+      data = UpdateProductSchema.cast({
+        name,
+        description,
+        image_url,
+        server_id,
+        benefits,
+        commands,
+      }) as any;
+    } catch (err) {
+      return res
+        .status(400)
+        .json({ error: Errors.INVALID_REQUEST, errors: err.errors });
+    }
+
+    // Caso o cast falhe
+    if (!data) return res.status(500).json({ error: Errors.INTERNAL_ERROR });
+
+    // Atualizar dados
+    await conn('products')
+      .where('id', id)
+      .update({ ...data, benefits: undefined, commands: undefined });
+
+    return res.json({ message: Success.UPDATED });
   },
 } as Controller;

@@ -62,3 +62,23 @@ export const CreateProductSchema = yup.object().shape({
     )
     .required(),
 });
+
+export const UpdateProductSchema = yup.object().shape({
+  name: yup.string().trim().min(4).max(30),
+  description: yup.string().trim().min(4).max(150),
+  image_url: yup.string().trim().url(),
+  server_id: yup.string().trim(),
+  price: yup.number().min(1),
+  benefits: yup.array().of(
+    yup.object().shape({
+      name: yup.string().trim().required().min(4).max(30),
+      description: yup.string().trim().required().min(4).max(60),
+    })
+  ),
+  commands: yup.array().of(
+    yup.object().shape({
+      name: yup.string().trim().required().min(4).max(30),
+      command: yup.string().trim().required().min(4).max(60),
+    })
+  ),
+});
