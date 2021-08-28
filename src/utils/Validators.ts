@@ -32,6 +32,11 @@ export const CreateServerSchema = yup.object().shape({
   description: yup.string().trim().required().min(4).max(150),
 });
 
+export const UpdateServerSchema = yup.object().shape({
+  name: yup.string().trim().min(4).max(30),
+  description: yup.string().trim().min(4).max(150),
+});
+
 export const CreateProductSchema = yup.object().shape({
   name: yup.string().trim().required().min(4).max(30),
   description: yup.string().trim().required().min(4).max(150),

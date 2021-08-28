@@ -1,7 +1,7 @@
 import { v4 as uuid } from 'uuid';
 
 import conn from '../database/Connection';
-import { CreateServerSchema } from '../utils/Validators';
+import { CreateServerSchema, UpdateServerSchema } from '../utils/Validators';
 import { Errors, Success } from '../utils/Response';
 
 import { Controller, ServerData } from '../typings';
@@ -138,11 +138,36 @@ export const ServersController = {
     if (!name && !description)
       return res.status(400).json({ error: Errors.INVALID_REQUEST });
 
+    const { id } = req.params as { id: string };
+
+    // Verificar se o servidor existe
+    const serverExists = await conn('servers').select('id').where('id', id);
+
+    if (!serverExists) return res.status(404).json({ error: Errors.NOT_FOUND });
+
     // Validar dados
+    let data: ServerData | undefined;
 
-    let data;
+    try {
+      UpdateServerSchema.validateSync(
+        { name, description },
+        { abortEarly: false }
+      );
 
-    return res.json(null);
+      data = UpdateServerSchema.cast({ name, description }) as any;
+    } catch (err) {
+      return res
+        .status(400)
+        .json({ error: Errors.INVALID_REQUEST, errors: err.errors });
+    }
+
+    // Caso o cast falhe
+    if (!data) return res.status(500).json({ error: Errors.INTERNAL_ERROR });
+
+    // Atualizar dados
+    await conn('servers').update(data).where('id', id);
+
+    return res.json({ message: Success.UPDATED });
   },
 
   async delete(req, res) {
