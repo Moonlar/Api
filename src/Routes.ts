@@ -47,7 +47,7 @@ routes.delete('/server/:id', ServersController.delete);
 
 /* Products Routes */
 routes.get('/products', ProductsController.show);
-routes.get('/product/:id', UnavailableRoute);
+routes.get('/product/:id', ProductsController.index);
 routes.post('/product', ProductsController.create);
 routes.patch('/product/:id', UnavailableRoute);
 routes.delete('/product/:id', UnavailableRoute);

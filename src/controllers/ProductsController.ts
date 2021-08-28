@@ -121,7 +121,51 @@ export const ProductsController = {
   },
 
   async index(req, res) {
-    return res.json(null);
+    const isAdmin = ['admin', 'manager'].includes(req.user?.permission || '');
+    const { id } = req.params as { id: string };
+
+    // Buscar produto
+    const product: ProductData | undefined = await conn('products')
+      .select('*')
+      .where('id', id)
+      .where('deleted_at', null)
+      .whereIn('active', isAdmin ? [true, false] : [true])
+      .first();
+
+    // Se não encontrar
+    if (!product) return res.status(404).json({ error: Errors.NOT_FOUND });
+
+    // Benefícios dos produtos
+    const benefits: BenefitData[] = await conn('products_benefits')
+      .select('*')
+      .where('product_id', id);
+
+    // Commandos de ativação dos produtos
+    const commands: CommandData[] = isAdmin
+      ? await conn('products_commands').select('*').where('product_id', id)
+      : [];
+
+    // Servidor do produto
+    const server = await conn('servers')
+      .select(['id', 'name', 'description'])
+      .where('id', product.server)
+      .first();
+
+    // Retornar dados formatados
+    return res.json({
+      id: product.id,
+      name: product.name,
+      description: product.description,
+      image_url: product.image_url,
+      price: product.price,
+      active: isAdmin ? product.active : undefined,
+      server,
+      benefits,
+      commands: isAdmin ? commands : undefined,
+      created_at: product.created_at,
+      updated_at: product.updated_at,
+      deleted_at: product.deleted_at,
+    });
   },
 
   async create(req, res) {
