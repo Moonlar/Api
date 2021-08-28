@@ -16,7 +16,7 @@ interface CreateProductData {
   name: string;
   description: string;
   image_url: string;
-  server: string;
+  server_id: string;
   price: number;
   benefits: {
     name: string;
@@ -24,7 +24,6 @@ interface CreateProductData {
   }[];
   commands: {
     name: string;
-    description: string;
     command: string;
   }[];
 }
@@ -73,7 +72,7 @@ export const ProductsController = {
 
     // ID de todos os produtos e servidores para relacionamento
     const productsIds = products.map((product) => product.id);
-    const serversIds = products.map((product) => product.server);
+    const serversIds = products.map((product) => product.server_id);
 
     // Benefícios dos produtos
     const benefits: BenefitData[] = await conn('products_benefits')
@@ -100,7 +99,8 @@ export const ProductsController = {
       image_url: product.image_url,
       price: product.price,
       active: isAdmin ? product.active : undefined,
-      server: servers.find((server) => server.id === product.server) || null,
+      server_id: undefined,
+      server: servers.find((server) => server.id === product.server_id) || null,
       benefits: benefits
         .filter((benefit) => benefit.product_id === product.id)
         .map((benefit) => ({ ...benefit, product_id: undefined })),
@@ -154,7 +154,7 @@ export const ProductsController = {
     // Servidor do produto
     const server = await conn('servers')
       .select(['id', 'name', 'description'])
-      .where('id', product.server)
+      .where('id', product.server_id)
       .first();
 
     // Retornar dados formatados
@@ -165,6 +165,7 @@ export const ProductsController = {
       image_url: product.image_url,
       price: product.price,
       active: isAdmin ? product.active : undefined,
+      server_id: undefined,
       server,
       benefits,
       commands: isAdmin ? commands : undefined,
@@ -183,8 +184,15 @@ export const ProductsController = {
       return res.status(401).json({ error: Errors.NO_PERMISSION });
 
     // Dados da requisição
-    const { name, benefits, commands, description, image_url, price, server } =
-      req.body as CreateProductData;
+    const {
+      name,
+      benefits,
+      commands,
+      description,
+      image_url,
+      price,
+      server_id,
+    } = req.body as CreateProductData;
 
     const bodyData = {
       name,
@@ -193,7 +201,7 @@ export const ProductsController = {
       description,
       image_url,
       price,
-      server,
+      server_id,
     };
 
     // Dados formatados
@@ -216,7 +224,7 @@ export const ProductsController = {
     // Validar id do servidor de relacionamento
     const serverExists: ServerData | undefined = await conn('servers')
       .select('id')
-      .where('id', server)
+      .where('id', server_id)
       .first();
 
     if (!serverExists)
@@ -229,7 +237,7 @@ export const ProductsController = {
       description: data.description,
       price: data.price,
       image_url: data.image_url,
-      server: data.server,
+      server_id: data.server_id,
     } as ProductData;
 
     const benefitsData = data.benefits.map((benefit) => ({

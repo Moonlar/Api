@@ -40,7 +40,7 @@ interface ProductData {
   name: string;
   description: string;
   image_url: string;
-  server: string;
+  server_id: string;
   price: number;
   active: boolean;
   created_at: string;
