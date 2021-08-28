@@ -23,23 +23,14 @@ export const ServersController = {
     let search = (req.query.search || '').toString();
     const limit = 10;
 
-    const isAdmin =
-      req.isAuth && ['admin', 'manager'].includes(req.user!.permission);
-
     // Informações
     const length = Number(
-      isAdmin
-        ? (
-            await conn('servers')
-              .count('id')
-              .where('name', 'like', `%${search}%`)
-          )[0]['count(`id`)']
-        : (
-            await conn('servers')
-              .count('id')
-              .where('deleted_at', null)
-              .where('name', 'like', `%${search}%`)
-          )[0]['count(`id`)']
+      (
+        await conn('servers')
+          .count('id')
+          .where('deleted_at', null)
+          .where('name', 'like', `%${search}%`)
+      )[0]['count(`id`)']
     );
     const pages = Math.ceil(length / limit) || 1;
 
@@ -52,31 +43,16 @@ export const ServersController = {
     const servers: ServerData[] = await conn('servers')
       .select('*')
       .where('name', 'like', `%${search}%`)
+      .where('deleted_at', null)
       .offset((page - 1) * limit)
       .limit(limit);
-
-    // Se tiver permissão admin ou manager retornar dados sem formatar
-    if (isAdmin) {
-      return res.json({
-        page,
-        total_pages: pages,
-        total_servers: length,
-        limit,
-        servers: servers,
-      });
-    }
-
-    // Retornar dados formatados
-    const serializedServers = servers.filter(
-      (server) => server.deleted_at === null
-    );
 
     return res.json({
       page,
       total_pages: pages,
       total_servers: length,
       limit,
-      servers: serializedServers,
+      servers,
     });
   },
 
@@ -88,18 +64,11 @@ export const ServersController = {
     const server: ServerData | undefined = await conn('servers')
       .select('*')
       .where('id', id)
+      .where('deleted_at', null)
       .first();
 
     // Caso não ache o servidor
     if (!server) {
-      return res.status(404).json({ error: Errors.NOT_FOUND });
-    }
-
-    // Se tiver permissão admin ou manager retornar dados sem formatar
-    // se não retornar 404
-    if (req.isAuth && ['admin', 'manager'].includes(req.user!.permission)) {
-      return res.json(server);
-    } else if (server.deleted_at !== null) {
       return res.status(404).json({ error: Errors.NOT_FOUND });
     }
 
@@ -190,13 +159,19 @@ export const ServersController = {
     const serverExist: ServerData | undefined = await conn('servers')
       .select('*')
       .where('id', id)
+      .where('deleted_at', null)
       .first();
 
     if (!serverExist) return res.status(404).json({ error: Errors.NOT_FOUND });
 
     // Atualizar informações
     await conn('servers')
-      .update({ updated_at: conn.fn.now(), deleted_at: conn.fn.now() })
+      .update({
+        name: 'deleted_' + Date.now().toString(),
+        description: 'deleted_' + Date.now().toString(),
+        updated_at: conn.fn.now(),
+        deleted_at: conn.fn.now(),
+      })
       .where('id', id);
 
     return res.status(202).json({ message: Success.DELETED });
