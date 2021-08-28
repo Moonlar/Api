@@ -369,3 +369,55 @@ type ResponseBody = {
   message: 'Successfully deleted';
 };
 ```
+
+## GET _/admin/auth_
+
+Retorna dados da sessão conectada
+
+_Precisa estar conectado_
+
+> Response
+
+```ts
+type ResponseBody = {
+  nickname: string;
+  permission: 'user' | 'admin' | 'manager';
+};
+```
+
+## POST _/admin/auth_
+
+Iniciar uma sessão
+
+_Precisa estar desconectado_
+
+> Body
+
+```ts
+type RequestBody = {
+  email: string;
+  password: string;
+};
+```
+
+> Response
+
+```ts
+type ResponseBody = {
+  message: 'Successfully login';
+};
+```
+
+## DELETE _/admin/auth_
+
+Encerrar uma sessão
+
+_Precisa estar conectado_
+
+> Response
+
+```ts
+type ResponseBody = {
+  message: 'Successfully logout';
+};
+```
