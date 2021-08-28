@@ -77,13 +77,13 @@ export const ProductsController = {
 
     // Benefícios dos produtos
     const benefits: BenefitData[] = await conn('products_benefits')
-      .select('*')
+      .select(['id', 'name', 'description', 'product_id'])
       .whereIn('product_id', productsIds);
 
     // Commandos de ativação dos produtos
     const commands: CommandData[] = isAdmin
       ? await conn('products_commands')
-          .select('*')
+          .select(['id', 'name', 'command', 'product_id'])
           .whereIn('product_id', productsIds)
       : [];
 
@@ -101,9 +101,13 @@ export const ProductsController = {
       price: product.price,
       active: isAdmin ? product.active : undefined,
       server: servers.find((server) => server.id === product.server) || null,
-      benefits: benefits.filter((benefit) => benefit.product_id === product.id),
+      benefits: benefits
+        .filter((benefit) => benefit.product_id === product.id)
+        .map((benefit) => ({ ...benefit, product_id: undefined })),
       commands: isAdmin
-        ? commands.filter((command) => command.product_id === product.id)
+        ? commands
+            .filter((command) => command.product_id === product.id)
+            .map((command) => ({ ...command, product_id: undefined }))
         : undefined,
       created_at: product.created_at,
       updated_at: product.updated_at,
@@ -137,12 +141,14 @@ export const ProductsController = {
 
     // Benefícios dos produtos
     const benefits: BenefitData[] = await conn('products_benefits')
-      .select('*')
+      .select(['id', 'name', 'description'])
       .where('product_id', id);
 
     // Commandos de ativação dos produtos
     const commands: CommandData[] = isAdmin
-      ? await conn('products_commands').select('*').where('product_id', id)
+      ? await conn('products_commands')
+          .select(['id', 'name', 'command'])
+          .where('product_id', id)
       : [];
 
     // Servidor do produto
