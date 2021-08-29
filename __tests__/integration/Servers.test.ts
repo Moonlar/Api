@@ -331,4 +331,89 @@ describe('Server Routes', () => {
       expect(isCreated).toBeTruthy();
     });
   });
+
+  describe('PATCH /server/:id', () => {
+    it('Deve estar conectado para atualizar servidores', async () => {
+      const response = await request.patch(`/server/${serversData[1].id}`);
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NEED_AUTHENTICATE);
+    });
+
+    it('(User) Deve retornar que não tem permissão', async () => {
+      const response = await userAgent.patch(`/server/${serversData[1].id}`);
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NO_PERMISSION);
+    });
+
+    it('(Admin) Deve retornar que não tem permissão', async () => {
+      const response = await adminAgent.patch(`/server/${serversData[1].id}`);
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NO_PERMISSION);
+    });
+
+    it('(Manager) Deve retornar que dados são inválidos (Sem dados)', async () => {
+      const response = await managerAgent.patch(`/server/${serversData[1].id}`);
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Deve retornar que não foi encontrado dados para atualizar', async () => {
+      const response = await managerAgent
+        .patch(`/server/${serversData[0].id}`)
+        .send({ name: 'New name', description: 'New description' });
+
+      expect(response.statusCode).toBe(404);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NOT_FOUND);
+    });
+
+    it('(Manager) Deve retornar que name já existe', async () => {
+      const response = await managerAgent
+        .patch(`/server/${serversData[1].id}`)
+        .send({ name: serversData[1].name, description: 'Valid description' });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Deve atualizar server', async () => {
+      const response = await managerAgent
+        .patch(`/server/${serversData[1].id}`)
+        .send({ name: 'Updated', description: 'Updated server' });
+
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.statusCode).toBe(200);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('message', Success.UPDATED);
+
+      const isUpdated = await conn('servers')
+        .select('*')
+        .where('identifier', 'updated')
+        .first();
+
+      expect(isUpdated).toBeTruthy();
+    });
+  });
 });

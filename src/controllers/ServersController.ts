@@ -144,12 +144,13 @@ export const ServersController = {
     const serverExists: { id: string } | undefined = await conn('servers')
       .select('id')
       .where('id', id)
+      .where('deleted_at', null)
       .first();
 
     if (!serverExists) return res.status(404).json({ error: Errors.NOT_FOUND });
 
     // Validar dados
-    let data: ServerData | undefined;
+    let data: UpdateServerData | undefined;
 
     try {
       UpdateServerSchema.validateSync(
@@ -167,8 +168,21 @@ export const ServersController = {
     // Caso o cast falhe
     if (!data) return res.status(500).json({ error: Errors.INTERNAL_ERROR });
 
+    // Verificar se o name já existe
+    if (data.name) {
+      const nameInUse = await conn('servers')
+        .select('id')
+        .where('identifier', data.name.toLowerCase())
+        .first();
+
+      if (nameInUse)
+        return res.status(400).json({ error: Errors.INVALID_REQUEST });
+    }
+
     // Atualizar dados
-    await conn('servers').update(data).where('id', id);
+    await conn('servers')
+      .update({ ...data, identifier: data.name?.toLowerCase() })
+      .where('id', id);
 
     return res.json({ message: Success.UPDATED });
   },
