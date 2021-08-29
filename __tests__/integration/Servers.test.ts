@@ -440,4 +440,68 @@ describe('Server Routes', () => {
       expect(isUpdated).toBeTruthy();
     });
   });
+
+  describe('DELETE /server/:id', () => {
+    it('Deve estar conectado para remover servidores', async () => {
+      const response = await request.delete(`/server/${serversData[1].id}`);
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NEED_AUTHENTICATE);
+    });
+
+    it('(User) Deve ter permissão para isso', async () => {
+      const response = await userAgent.delete(`/server/${serversData[1].id}`);
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NO_PERMISSION);
+    });
+
+    it('(Admin) Deve ter permissão para isso', async () => {
+      const response = await adminAgent.delete(`/server/${serversData[1].id}`);
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NO_PERMISSION);
+    });
+
+    it('(Manager) Deve retornar que servidor não foi encontrado', async () => {
+      const response = await managerAgent.delete(
+        `/server/${serversData[0].id}`
+      );
+
+      expect(response.statusCode).toBe(404);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NOT_FOUND);
+    });
+
+    it('(Manager) Deve remover servidor', async () => {
+      const response = await managerAgent.delete(
+        `/server/${serversData[1].id}`
+      );
+
+      expect(response.statusCode).toBe(200);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('message', Success.DELETED);
+
+      const wasDeleted = await conn('servers')
+        .select('id')
+        .where('id', serversData[1].id)
+        .where('deleted_at', '!=', null)
+        .first();
+
+      expect(wasDeleted).toBeFalsy();
+    });
+  });
 });

@@ -216,6 +216,6 @@ export const ServersController = {
       })
       .where('id', id);
 
-    return res.status(202).json({ message: Success.DELETED });
+    return res.status(200).json({ message: Success.DELETED });
   },
 } as Controller;
