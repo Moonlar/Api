@@ -110,7 +110,7 @@ export const ServersController = {
       .first();
 
     if (serverExists)
-      return res.status(401).json({ error: Errors.INVALID_REQUEST });
+      return res.status(400).json({ error: Errors.INVALID_REQUEST });
 
     // Dados para inserir no banco de dados
     data = {

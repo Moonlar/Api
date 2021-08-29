@@ -2,9 +2,9 @@ import supertest from 'supertest';
 import { matchers } from 'jest-json-schema';
 
 import app from '../../src/App';
-import { runMigrations, runSeeds } from '../../src/database/Connection';
+import conn, { runMigrations, runSeeds } from '../../src/database/Connection';
 import { serverSchema } from '../utils/schemas';
-import { Errors } from '../../src/utils/Response';
+import { Errors, Success } from '../../src/utils/Response';
 import {
   createDefaultServers,
   createDefaultUsers,
@@ -81,7 +81,7 @@ describe('Server Routes', () => {
       expect(response.body).toBeTruthy();
       expect(response.body).toHaveProperty('page', 1);
       expect(response.body).toHaveProperty('total_pages', 1);
-      expect(response.body).toHaveProperty('total_servers', 2);
+      expect(response.body).toHaveProperty('total_servers', 1);
       expect(response.body).toHaveProperty('limit', 10);
       expect(response.body).toHaveProperty('servers');
       expect(Array.isArray(response.body.servers)).toBe(true);
@@ -100,7 +100,7 @@ describe('Server Routes', () => {
       expect(response.body).toBeTruthy();
       expect(response.body).toHaveProperty('page', 1);
       expect(response.body).toHaveProperty('total_pages', 1);
-      expect(response.body).toHaveProperty('total_servers', 2);
+      expect(response.body).toHaveProperty('total_servers', 1);
       expect(response.body).toHaveProperty('limit', 10);
       expect(response.body).toHaveProperty('servers');
       expect(Array.isArray(response.body.servers)).toBe(true);
@@ -211,7 +211,7 @@ describe('Server Routes', () => {
     });
 
     it('(Admin) Deve retornar dados válidos', async () => {
-      const response = await adminAgent.get(`/server/${serversData[0].id}`);
+      const response = await adminAgent.get(`/server/${serversData[1].id}`);
 
       expect(response.statusCode).toBe(200);
       expect(response.headers).toBeTruthy();
@@ -221,13 +221,114 @@ describe('Server Routes', () => {
     });
 
     it('(Manager) Deve retornar dados válidos', async () => {
-      const response = await managerAgent.get(`/server/${serversData[0].id}`);
+      const response = await managerAgent.get(`/server/${serversData[1].id}`);
 
       expect(response.statusCode).toBe(200);
       expect(response.headers).toBeTruthy();
       expect(response.headers['content-type']).toMatch(/json/);
       expect(response.body).toBeTruthy();
       expect(response.body).toMatchSchema(serverSchema);
+    });
+  });
+
+  describe('POST /server', () => {
+    it('Deve estar conectado para criar servidores', async () => {
+      const response = await request.post('/server');
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NEED_AUTHENTICATE);
+    });
+
+    it('(User) Deve retornar que não tem permissão', async () => {
+      const response = await userAgent.post('/server');
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NO_PERMISSION);
+    });
+
+    it('(Admin) Deve retornar que não tem permissão', async () => {
+      const response = await adminAgent.post('/server');
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NO_PERMISSION);
+    });
+
+    it('(Manager) Deve retornar que dados são inválidos (Sem dados)', async () => {
+      const response = await managerAgent.post('/server');
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Deve retornar que dados são inválidos (Sem name)', async () => {
+      const response = await managerAgent
+        .post('/server')
+        .send({ description: 'Valid description' });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+      expect(response.body).toHaveProperty('errors');
+      expect(Array.isArray(response.body.errors)).toBe(true);
+    });
+
+    it('(Manager) Deve retornar que dados são inválidos (Sem description)', async () => {
+      const response = await managerAgent
+        .post('/server')
+        .send({ name: 'Valid name' });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+      expect(response.body).toHaveProperty('errors');
+      expect(Array.isArray(response.body.errors)).toBe(true);
+    });
+
+    it('(Manager) Deve retornar que name já existe', async () => {
+      const response = await managerAgent
+        .post('/server')
+        .send({ name: serversData[1].name, description: 'Valid description' });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Deve criar server', async () => {
+      const response = await managerAgent
+        .post('/server')
+        .send({ name: 'New server', description: 'Server description' });
+
+      expect(response.statusCode).toBe(201);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('message', Success.CREATED);
+
+      const isCreated = await conn('servers')
+        .select('*')
+        .where('identifier', 'new server')
+        .first();
+
+      expect(isCreated).toBeTruthy();
     });
   });
 });
