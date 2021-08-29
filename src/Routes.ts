@@ -50,7 +50,7 @@ routes.get('/products', ProductsController.show);
 routes.get('/product/:id', ProductsController.index);
 routes.post('/product', ProductsController.create);
 routes.patch('/product/:id', ProductsController.update);
-routes.delete('/product/:id', UnavailableRoute);
+routes.delete('/product/:id', ProductsController.delete);
 
 /* Coupons Routes */
 routes.get('/coupons', UnavailableRoute);

@@ -35,14 +35,6 @@ interface UpdateProductData {
   server_id?: string;
   price?: number;
   active?: boolean;
-  benefits?: {
-    name: string;
-    description: string;
-  }[];
-  commands?: {
-    name: string;
-    command: string;
-  }[];
 }
 
 export const ProductsController = {
@@ -304,18 +296,11 @@ export const ProductsController = {
       return res.status(401).json({ error: Errors.NO_PERMISSION });
 
     // Dados para atualizar
-    const { name, description, image_url, server_id, benefits, commands } =
+    const { name, description, image_url, server_id } =
       req.body as UpdateProductData;
 
     // Se não for fornecido dados para atualizar
-    if (
-      !name &&
-      !description &&
-      !image_url &&
-      !server_id &&
-      !benefits &&
-      !commands
-    )
+    if (!name && !description && !image_url && !server_id)
       return res.status(400).json({ error: Errors.INVALID_REQUEST });
 
     const { id } = req.params as { id: string };
@@ -335,7 +320,7 @@ export const ProductsController = {
 
     try {
       UpdateProductSchema.validateSync(
-        { name, description, image_url, server_id, benefits, commands },
+        { name, description, image_url, server_id },
         { abortEarly: false }
       );
 
@@ -344,8 +329,6 @@ export const ProductsController = {
         description,
         image_url,
         server_id,
-        benefits,
-        commands,
       }) as any;
     } catch (err) {
       return res
@@ -359,8 +342,68 @@ export const ProductsController = {
     // Atualizar dados
     await conn('products')
       .where('id', id)
-      .update({ ...data, benefits: undefined, commands: undefined });
+      .update({ ...data });
 
     return res.json({ message: Success.UPDATED });
+  },
+
+  async delete(req, res) {
+    if (!req.isAuth) return res.authError();
+
+    if (req.user?.permission !== 'manager')
+      return res.status(401).json({ error: Errors.NO_PERMISSION });
+
+    const { id } = req.params;
+
+    const productExist = await conn('products')
+      .select('id')
+      .where('id', id)
+      .where('deleted_at', null);
+
+    if (!productExist) return res.status(404).json({ error: Errors.NOT_FOUND });
+
+    const deletedField = 'deleted_' + Date.now();
+
+    const trx = await conn.transaction();
+
+    try {
+      await Promise.all([
+        trx('product')
+          .update({
+            name: deletedField,
+            description: deletedField,
+            price: 0,
+            active: false,
+            server_id: deletedField,
+            image_url: deletedField,
+            deleted_at: conn.fn.now(),
+          })
+          .where('id', id),
+        trx('product_benefits')
+          .update({
+            name: deletedField,
+            description: deletedField,
+            deleted_at: conn.fn.now(),
+          })
+          .where('product_id', id),
+        trx('product_commands')
+          .update({
+            name: deletedField,
+            command: deletedField,
+            deleted_at: conn.fn.now(),
+          })
+          .where('product_id', id),
+      ]);
+
+      await trx.commit();
+    } catch (err) {
+      trx.rollback();
+
+      console.log(err);
+
+      return res.json({ error: Errors.INTERNAL_ERROR });
+    }
+
+    return res.json({ message: Success.DELETED });
   },
 } as Controller;
