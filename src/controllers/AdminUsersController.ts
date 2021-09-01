@@ -41,6 +41,7 @@ export const AdminUsersController = {
         await conn('admin_users')
           .count('id')
           .where('identifier', 'like', `%${search}%`)
+          .where('deleted_at', null)
       )[0]['count(`id`)']
     );
     const pages = Math.ceil(length / limit) || 1;
@@ -54,6 +55,7 @@ export const AdminUsersController = {
     const users: AdminUserData[] = await conn('admin_users')
       .select('*')
       .where('identifier', 'like', `%${search}%`)
+      .where('deleted_at', null)
       .offset((page - 1) * limit)
       .limit(limit);
 
@@ -89,6 +91,7 @@ export const AdminUsersController = {
     const user: AdminUserData = await conn('admin_users')
       .select('*')
       .where('identifier', identifier ? identifier : req.user!.nickname)
+      .where('deleted_at', null)
       .first();
 
     // Retornar erro caso não tenha encontrado

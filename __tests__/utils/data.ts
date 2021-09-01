@@ -11,6 +11,15 @@ let alreadyExecuted = {
 const usersData = [
   {
     id: uuid(),
+    identifier: 'deleted',
+    nickname: 'Deleted',
+    email: 'deleted@gmail.com',
+    password: Password.hash('12345678'),
+    permission: 'admin',
+    deleted_at: conn.fn.now(),
+  },
+  {
+    id: uuid(),
     identifier: 'admin',
     nickname: 'Admin',
     email: 'admin@gmail.com',

@@ -139,4 +139,88 @@ describe('Admin Users Routes', () => {
       });
     });
   });
+
+  describe('GET /admin/user/:identifier', () => {
+    it('Precisa estar conectado', async () => {
+      const response = await request.get('/admin/user/default');
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NEED_AUTHENTICATE);
+    });
+
+    it('(User) Precisa ter permissão', async () => {
+      const response = await userAgent.get('/admin/user/default');
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NO_PERMISSION);
+    });
+
+    it('(Admin) Precisa ter permissão', async () => {
+      const response = await adminAgent.get('/admin/user/default');
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NO_PERMISSION);
+    });
+
+    it('(Manager) Usuário não encontrado', async () => {
+      const response = await managerAgent.get('/admin/user/not_found');
+
+      expect(response.statusCode).toBe(404);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NOT_FOUND);
+    });
+
+    it('(Manager) Usuário não encontrado (Deleted)', async () => {
+      const response = await managerAgent.get('/admin/user/deleted');
+
+      expect(response.statusCode).toBe(404);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NOT_FOUND);
+    });
+
+    it('(Manager) Retorna dados válidos', async () => {
+      const response = await managerAgent.get('/admin/user/admin');
+
+      expect(response.statusCode).toBe(200);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toMatchSchema(userSchema);
+    });
+  });
+
+  describe('GET /admin/user', () => {
+    it('Precisa estar conectado', async () => {
+      const response = await request.get('/admin/user/default');
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NEED_AUTHENTICATE);
+    });
+
+    it('(Manager) Retorna dados válidos', async () => {
+      const response = await managerAgent.get('/admin/user');
+
+      expect(response.statusCode).toBe(200);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toMatchSchema(userSchema);
+    });
+  });
 });
