@@ -37,7 +37,11 @@ export const AdminUsersController = {
 
     // Informações
     const length = Number(
-      (await conn('admin_users').count('id'))[0]['count(`id`)']
+      (
+        await conn('admin_users')
+          .count('id')
+          .where('identifier', 'like', `%${search}%`)
+      )[0]['count(`id`)']
     );
     const pages = Math.ceil(length / limit) || 1;
 
@@ -49,7 +53,7 @@ export const AdminUsersController = {
     // Buscar no banco de dados
     const users: AdminUserData[] = await conn('admin_users')
       .select('*')
-      .where('nickname', 'like', `%${search}%`)
+      .where('identifier', 'like', `%${search}%`)
       .offset((page - 1) * limit)
       .limit(limit);
 
