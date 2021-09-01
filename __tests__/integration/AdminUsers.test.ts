@@ -2,9 +2,9 @@ import supertest from 'supertest';
 import { matchers } from 'jest-json-schema';
 
 import app from '../../src/App';
-import { runMigrations, runSeeds } from '../../src/database/Connection';
+import conn, { runMigrations, runSeeds } from '../../src/database/Connection';
 import { createDefaultUsers } from '../utils/data';
-import { Errors } from '../../src/utils/Response';
+import { Errors, Success } from '../../src/utils/Response';
 import { userSchema } from '../utils/schemas';
 
 expect.extend(matchers);
@@ -221,6 +221,127 @@ describe('Admin Users Routes', () => {
       expect(response.headers['content-type']).toMatch(/json/);
       expect(response.body).toBeTruthy();
       expect(response.body).toMatchSchema(userSchema);
+    });
+  });
+
+  describe('POST /admin/user', () => {
+    it('Precisa estar conectado', async () => {
+      const response = await request.post('/admin/user');
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NEED_AUTHENTICATE);
+    });
+
+    it('(User) Precisa ter permissão', async () => {
+      const response = await userAgent.post('/admin/user');
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NO_PERMISSION);
+    });
+
+    it('(Admin) Precisa ter permissão', async () => {
+      const response = await adminAgent.post('/admin/user');
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NO_PERMISSION);
+    });
+
+    it('(Manager) Dados inválidos (none data)', async () => {
+      const response = await managerAgent.post('/admin/user');
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Dados inválidos (none nickname)', async () => {
+      const response = await managerAgent
+        .post('/admin/user')
+        .send({ email: 'valid@gmail.com' });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Dados inválidos (none email)', async () => {
+      const response = await managerAgent
+        .post('/admin/user')
+        .send({ nickname: 'Valid' });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Dados inválidos', async () => {
+      const response = await managerAgent
+        .post('/admin/user')
+        .send({ nickname: 'Invalid%', email: 'invalid' });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Dados em uso (nickname)', async () => {
+      const response = await managerAgent
+        .post('/admin/user')
+        .send({ nickname: 'Default', email: 'new@gmail.com' });
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Dados em uso (email)', async () => {
+      const response = await managerAgent
+        .post('/admin/user')
+        .send({ nickname: 'New_', email: 'default@gmail.com' });
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Criar usuário', async () => {
+      const response = await managerAgent
+        .post('/admin/user')
+        .send({ nickname: 'New_', email: 'new@gmail.com' });
+
+      expect(response.statusCode).toBe(201);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('message', Success.CREATED);
+
+      const createdUser = await conn('admin_users')
+        .select('*')
+        .where('identifier', 'new_')
+        .first();
+
+      expect(createdUser).toBeTruthy();
     });
   });
 });
