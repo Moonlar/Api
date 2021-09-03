@@ -344,4 +344,124 @@ describe('Admin Users Routes', () => {
       expect(createdUser).toBeTruthy();
     });
   });
+
+  describe('PATCH /admin/user/:identifier', () => {
+    it('Precisa estar conectado', async () => {
+      const response = await request.patch('/admin/user/new_');
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NEED_AUTHENTICATE);
+    });
+
+    it('(User) Precisa ter permissão', async () => {
+      const response = await userAgent.patch('/admin/user/new_');
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NO_PERMISSION);
+    });
+
+    it('(Admin) Precisa ter permissão', async () => {
+      const response = await adminAgent.patch('/admin/user/new_');
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NO_PERMISSION);
+    });
+
+    it('(Manager) Sem dados para atualizar', async () => {
+      const response = await managerAgent.patch('/admin/user/new_');
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Dados inválidos (nickname)', async () => {
+      const response = await managerAgent
+        .patch('/admin/user/new_')
+        .send({ nickname: ' $invalid@' });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Dados inválidos (email)', async () => {
+      const response = await managerAgent
+        .patch('/admin/user/new_')
+        .send({ email: ' $invalid@' });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Dados inválidos (permission)', async () => {
+      const response = await managerAgent
+        .patch('/admin/user/new_')
+        .send({ permission: ' user' });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Dados em uso (nickname)', async () => {
+      const response = await managerAgent
+        .patch('/admin/user/new_')
+        .send({ nickname: 'admin' });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Dados em uso (email)', async () => {
+      const response = await managerAgent
+        .patch('/admin/user/new_')
+        .send({ email: 'admin@gmail.com' });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Atualizar dados', async () => {
+      const response = await managerAgent
+        .patch('/admin/user/new_')
+        .send({ email: 'updated@gmail.com', nickname: 'Updated' });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('message', Success.UPDATED);
+
+      const updatedUser = await conn('admin_users')
+        .select('*')
+        .where('identifier', 'updated');
+
+      expect(updatedUser).toBeTruthy();
+    });
+  });
 });

@@ -199,17 +199,16 @@ export const AdminUsersController = {
     }
 
     // Verificar disponibilidade do nickname
-    if (nickname) {
-      const userAlreadyExist: AdminUserData | undefined = await conn(
-        'admin_users'
-      )
-        .select('id')
-        .where('identifier', nickname.toLowerCase())
-        .first();
+    const userAlreadyExist: AdminUserData | undefined = await conn(
+      'admin_users'
+    )
+      .select('id')
+      .where('identifier', (nickname || '').toLowerCase())
+      .orWhere('email', (email || '').toLowerCase())
+      .first();
 
-      if (userAlreadyExist)
-        return res.status(401).json({ error: Errors.INVALID_REQUEST });
-    }
+    if (userAlreadyExist)
+      return res.status(400).json({ error: Errors.INVALID_REQUEST });
 
     // Novos dados para atualizar
     const newData = {
