@@ -48,13 +48,6 @@ describe('Products Routes', () => {
       response.body.products.forEach((product: any) => {
         expect(product).toMatchSchema(productSchema);
         expect(product.server).toMatchSchema(productServerSchema);
-        expect(product.commands).toBeFalsy();
-        expect(product.benefits).toBeTruthy();
-        expect(Array.isArray(product.benefits)).toBeTruthy();
-
-        product.benefits.forEach((benefit: any) => {
-          expect(benefit).toMatchSchema(productBenefitSchema);
-        });
       });
     });
   });

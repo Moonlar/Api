@@ -79,21 +79,8 @@ export const ProductsController = {
       .offset((page - 1) * limit)
       .limit(limit);
 
-    // ID de todos os produtos e servidores para relacionamento
-    const productsIds = products.map((product) => product.id);
+    // ID de todos os servidores para relacionamento
     const serversIds = products.map((product) => product.server_id);
-
-    // Benefícios dos produtos
-    const benefits: BenefitData[] = await conn('products_benefits')
-      .select(['id', 'name', 'description', 'product_id'])
-      .whereIn('product_id', productsIds);
-
-    // Commandos de ativação dos produtos
-    const commands: CommandData[] = isAdmin
-      ? await conn('products_commands')
-          .select(['id', 'name', 'command', 'product_id'])
-          .whereIn('product_id', productsIds)
-      : [];
 
     // Servidores dos produtos
     const servers: ServerData[] = await conn('servers')
@@ -110,14 +97,6 @@ export const ProductsController = {
       active: isAdmin ? product.active : undefined,
       server_id: undefined,
       server: servers.find((server) => server.id === product.server_id) || null,
-      benefits: benefits
-        .filter((benefit) => benefit.product_id === product.id)
-        .map((benefit) => ({ ...benefit, product_id: undefined })),
-      commands: isAdmin
-        ? commands
-            .filter((command) => command.product_id === product.id)
-            .map((command) => ({ ...command, product_id: undefined }))
-        : undefined,
       created_at: product.created_at,
       updated_at: product.updated_at,
       deleted_at: product.deleted_at,
