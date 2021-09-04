@@ -455,22 +455,55 @@ type ResponseBody = {
       name: string;
       description: string;
     };
-    benefits: {
-      id: string;
-      name: string;
-      description: string;
-    }[];
-    /* Retorna undefined se o nível de permissão for inferior a Admin */
-    commands:
-      | undefined
-      | {
-          id: string;
-          name: string;
-          command: string;
-        }[];
     created_at: string;
     updated_at: string;
     deleted_at: null;
   }[];
+};
+```
+
+## GET _/product/:id_
+
+Buscar produto da loja pelo id
+
+_Pode não estar autenticado_
+
+> Route Params
+
+| Name |  Description  |
+| :--: | :-----------: |
+| :id  | ID do produto |
+
+> Response
+
+```ts
+type ResponseBody = {
+  id: string;
+  name: string;
+  description: string;
+  image_url: string | null;
+  price: number;
+  active: boolean | undefined; // Retorna undefined caso nível de permissão seja inferior a Admin
+  server: {
+    id: string;
+    name: string;
+    description: string;
+  };
+  benefits: {
+    id: string;
+    name: string;
+    description: string;
+  }[];
+  /* Retorna undefined se o nível de permissão for inferior a Admin */
+  commands:
+    | undefined
+    | {
+        id: string;
+        name: string;
+        command: string;
+      }[];
+  created_at: string;
+  updated_at: string;
+  deleted_at: null;
 };
 ```
