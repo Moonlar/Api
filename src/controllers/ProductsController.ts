@@ -35,6 +35,8 @@ interface UpdateProductData {
   server_id?: string;
   price?: number;
   active?: boolean;
+  benefits?: { id?: string; name: string; description: string }[];
+  commands?: { id?: string; name: string; command: string }[];
 }
 
 export const ProductsController = {
@@ -275,11 +277,28 @@ export const ProductsController = {
       return res.status(401).json({ error: Errors.NO_PERMISSION });
 
     // Dados para atualizar
-    const { name, description, image_url, server_id, active, price } =
-      req.body as UpdateProductData;
+    const {
+      name,
+      description,
+      image_url,
+      server_id,
+      active,
+      price,
+      benefits,
+      commands,
+    } = req.body as UpdateProductData;
 
     // Se não for fornecido dados para atualizar
-    if (!name && !description && !image_url && !server_id && !active && !price)
+    if (
+      !name &&
+      !description &&
+      !image_url &&
+      !server_id &&
+      !active &&
+      !price &&
+      !benefits &&
+      !commands
+    )
       return res.status(400).json({ error: Errors.INVALID_REQUEST });
 
     const { id } = req.params as { id: string };
@@ -299,7 +318,16 @@ export const ProductsController = {
 
     try {
       UpdateProductSchema.validateSync(
-        { name, description, image_url, server_id, price, active },
+        {
+          name,
+          description,
+          image_url,
+          server_id,
+          price,
+          active,
+          benefits,
+          commands,
+        },
         { abortEarly: false }
       );
 
@@ -310,6 +338,8 @@ export const ProductsController = {
         server_id,
         active,
         price,
+        benefits,
+        commands,
       }) as any;
     } catch (err: any) {
       return res
@@ -320,13 +350,27 @@ export const ProductsController = {
     // Caso o cast falhe
     if (!data) return res.status(500).json({ error: Errors.INTERNAL_ERROR });
 
-    // Atualizar dados
-    await conn('products')
-      .where('id', id)
-      .update({ ...data });
+    // Verificar se tem campos para atualizar no produto
+    const newFields = Object.values({
+      ...data,
+      benefits: undefined,
+      commands: undefined,
+    }).filter((value) => value !== undefined).length;
 
-    /* TO-DO */
-    /* Atualizar benefícios e comandos */
+    // Atualizar dados
+    if (newFields > 0) {
+      await conn('products')
+        .where('id', id)
+        .update({ ...data, benefits: undefined, commands: undefined });
+    }
+
+    // Atualizar dados relacionados
+    if (data.benefits && data.benefits.length > 0) {
+      const benefitsData = data.benefits.map((benefit) => ({
+        ...benefit,
+        product_id: id,
+      }));
+    }
 
     return res.json({ message: Success.UPDATED });
   },
