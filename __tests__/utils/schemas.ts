@@ -123,14 +123,13 @@ export const productSchema = {
     'description',
     'image_url',
     'price',
-    'active',
     'created_at',
     'updated_at',
   ],
 };
 
 export const productServerSchema = {
-  $id: 'productTestSchema',
+  $id: 'productServerTestSchema',
   type: 'object',
   properties: {
     id: {
@@ -150,7 +149,7 @@ export const productServerSchema = {
 };
 
 export const productBenefitSchema = {
-  $id: 'productTestSchema',
+  $id: 'productBenefitTestSchema',
   type: 'object',
   properties: {
     id: {
@@ -170,7 +169,7 @@ export const productBenefitSchema = {
 };
 
 export const productCommandSchema = {
-  $id: 'productTestSchema',
+  $id: 'productCommandTestSchema',
   type: 'object',
   properties: {
     id: {

@@ -138,8 +138,18 @@ export const createDefaultProducts = () => {
 
   alreadyExecuted.products = true;
 
-  const benefits = [],
-    commands = [];
+  const benefits: {
+    id: string;
+    name: string;
+    description: string;
+    product_id: string;
+  }[] = [];
+  const commands: {
+    id: string;
+    name: string;
+    command: string;
+    product_id: string;
+  }[] = [];
 
   productsData.forEach(({ id }, index) => {
     if (index === 0) return;
