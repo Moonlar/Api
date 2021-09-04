@@ -239,7 +239,7 @@ type ResponseBody = {
 };
 ```
 
-## GET _/servers/_
+## GET _/servers_
 
 Buscar servidores de relacionado
 
@@ -419,5 +419,58 @@ _Precisa estar conectado_
 ```ts
 type ResponseBody = {
   message: 'Successfully logout';
+};
+```
+
+## GET _/products_
+
+Buscar produtos da loja
+
+_Pode não estar autenticado_
+
+> Query Params
+
+|  Name  |  Type  | Required |     Description     |
+| :----: | :----: | :------: | :-----------------: |
+|  page  | number |  false   |   Página de busca   |
+| search | string |  false   | Parâmetros de busca |
+
+> Response
+
+```ts
+type ResponseBody = {
+  page: number;
+  total_pages: number;
+  total_products: number;
+  limit: number;
+  products: {
+    id: string;
+    name: string;
+    description: string;
+    image_url: string | null;
+    price: number;
+    active: boolean | undefined; // Retorna undefined caso nível de permissão seja inferior a Admin
+    server: {
+      id: string;
+      name: string;
+      description: string;
+    };
+    benefits: {
+      id: string;
+      name: string;
+      description: string;
+    }[];
+    /* Retorna undefined se o nível de permissão for inferior a Admin */
+    commands:
+      | undefined
+      | {
+          id: string;
+          name: string;
+          command: string;
+        }[];
+    created_at: string;
+    updated_at: string;
+    deleted_at: null;
+  }[];
 };
 ```
