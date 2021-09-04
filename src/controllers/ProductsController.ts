@@ -221,7 +221,7 @@ export const ProductsController = {
       CreateProductSchema.validateSync(bodyData, { abortEarly: false });
 
       data = CreateProductSchema.cast(bodyData) as any;
-    } catch (err) {
+    } catch (err: any) {
       return res
         .status(400)
         .json({ error: Errors.INVALID_REQUEST, errors: err.errors });
@@ -296,11 +296,11 @@ export const ProductsController = {
       return res.status(401).json({ error: Errors.NO_PERMISSION });
 
     // Dados para atualizar
-    const { name, description, image_url, server_id } =
+    const { name, description, image_url, server_id, active, price } =
       req.body as UpdateProductData;
 
     // Se não for fornecido dados para atualizar
-    if (!name && !description && !image_url && !server_id)
+    if (!name && !description && !image_url && !server_id && !active && !price)
       return res.status(400).json({ error: Errors.INVALID_REQUEST });
 
     const { id } = req.params as { id: string };
@@ -320,7 +320,7 @@ export const ProductsController = {
 
     try {
       UpdateProductSchema.validateSync(
-        { name, description, image_url, server_id },
+        { name, description, image_url, server_id, price, active },
         { abortEarly: false }
       );
 
@@ -329,8 +329,10 @@ export const ProductsController = {
         description,
         image_url,
         server_id,
+        active,
+        price,
       }) as any;
-    } catch (err) {
+    } catch (err: any) {
       return res
         .status(400)
         .json({ error: Errors.INVALID_REQUEST, errors: err.errors });
@@ -344,17 +346,22 @@ export const ProductsController = {
       .where('id', id)
       .update({ ...data });
 
+    /* TO-DO */
+    /* Atualizar benefícios e comandos */
+
     return res.json({ message: Success.UPDATED });
   },
 
   async delete(req, res) {
     if (!req.isAuth) return res.authError();
 
+    // Se não tiver permissão
     if (req.user?.permission !== 'manager')
       return res.status(401).json({ error: Errors.NO_PERMISSION });
 
     const { id } = req.params;
 
+    // Verificar se o produto existe
     const productExist = await conn('products')
       .select('id')
       .where('id', id)
@@ -362,8 +369,10 @@ export const ProductsController = {
 
     if (!productExist) return res.status(404).json({ error: Errors.NOT_FOUND });
 
+    // String que vai substituir dados originais
     const deletedField = 'deleted_' + Date.now();
 
+    // Atualizar dados
     const trx = await conn.transaction();
 
     try {

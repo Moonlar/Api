@@ -69,4 +69,5 @@ export const UpdateProductSchema = yup.object().shape({
   image_url: yup.string().trim().url(),
   server_id: yup.string().trim(),
   price: yup.number().min(1),
+  active: yup.boolean(),
 });
