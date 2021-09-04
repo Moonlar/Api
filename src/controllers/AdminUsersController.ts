@@ -124,7 +124,7 @@ export const AdminUsersController = {
         { nickname, email },
         { abortEarly: false }
       );
-    } catch (err) {
+    } catch (err: any) {
       return res
         .status(400)
         .json({ error: Errors.INVALID_REQUEST, errors: err.errors });
@@ -192,7 +192,7 @@ export const AdminUsersController = {
         { nickname, email, permission },
         { abortEarly: false }
       );
-    } catch (err) {
+    } catch (err: any) {
       return res
         .status(400)
         .json({ error: Errors.INVALID_REQUEST, errors: err.errors });
@@ -264,6 +264,6 @@ export const AdminUsersController = {
     // Adicionar token a blacklist
     /* To-Do */
 
-    return res.status(202).json({ message: Success.DELETED });
+    return res.status(200).json({ message: Success.DELETED });
   },
 } as Controller;
