@@ -3,10 +3,16 @@ import { matchers } from 'jest-json-schema';
 
 import app from '../../src/App';
 import { runMigrations, runSeeds } from '../../src/database/Connection';
-import { createDefaultProducts, createDefaultServers } from '../utils/data';
+import { Errors } from '../../src/utils/Response';
 import {
-  productBenefitSchema,
+  createDefaultProducts,
+  createDefaultServers,
+  productsData,
+} from '../utils/data';
+import {
   productSchema,
+  productBenefitSchema,
+  productCommandSchema,
   productServerSchema,
 } from '../utils/schemas';
 
@@ -129,6 +135,151 @@ describe('Products Routes', () => {
       expect(response.body).toHaveProperty('products');
       expect(Array.isArray(response.body.products)).toBeTruthy();
       expect(response.body.products.length).toBe(0);
+    });
+  });
+
+  describe('GET /product/:id', () => {
+    it('Produto inexistente', async () => {
+      const response = await request.get('/product/invalid');
+
+      expect(response.statusCode).toBe(404);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NOT_FOUND);
+    });
+
+    it('(Admin) Produto inexistente', async () => {
+      const response = await adminAgent.get('/product/invalid');
+
+      expect(response.statusCode).toBe(404);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NOT_FOUND);
+    });
+
+    it('(Manager) Produto inexistente', async () => {
+      const response = await managerAgent.get('/product/invalid');
+
+      expect(response.statusCode).toBe(404);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NOT_FOUND);
+    });
+
+    it('Produto removido', async () => {
+      const response = await request.get(`/product/${productsData[0].id}`);
+
+      expect(response.statusCode).toBe(404);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NOT_FOUND);
+    });
+
+    it('(Admin) Produto removido', async () => {
+      const response = await adminAgent.get(`/product/${productsData[0].id}`);
+
+      expect(response.statusCode).toBe(404);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NOT_FOUND);
+    });
+
+    it('(Manager) Produto removido', async () => {
+      const response = await managerAgent.get(`/product/${productsData[0].id}`);
+
+      expect(response.statusCode).toBe(404);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NOT_FOUND);
+    });
+
+    it('Produto desativado', async () => {
+      const response = await request.get(`/product/${productsData[1].id}`);
+
+      expect(response.statusCode).toBe(404);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NOT_FOUND);
+    });
+
+    it('(Admin) Produto desativado', async () => {
+      const response = await adminAgent.get(`/product/${productsData[1].id}`);
+
+      expect(response.statusCode).toBe(200);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body.active).toBeFalsy();
+      expect(response.body.server_id).toBeFalsy();
+      expect(response.body).toMatchSchema(productSchema);
+      expect(response.body).toHaveProperty('benefits');
+      expect(response.body).toHaveProperty('commands');
+      expect(response.body).toHaveProperty('server');
+      expect(response.body.server).toMatchSchema(productServerSchema);
+      expect(Array.isArray(response.body.benefits)).toBeTruthy();
+      expect(Array.isArray(response.body.commands)).toBeTruthy();
+
+      response.body.benefits.forEach((benefit: any) => {
+        expect(benefit).toMatchSchema(productBenefitSchema);
+      });
+
+      response.body.commands.forEach((command: any) => {
+        expect(command).toMatchSchema(productCommandSchema);
+      });
+    });
+
+    it('(Manager) Produto desativado', async () => {
+      const response = await managerAgent.get(`/product/${productsData[1].id}`);
+
+      expect(response.statusCode).toBe(200);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body.active).toBeFalsy();
+      expect(response.body.server_id).toBeFalsy();
+      expect(response.body).toMatchSchema(productSchema);
+      expect(response.body).toHaveProperty('benefits');
+      expect(response.body).toHaveProperty('commands');
+      expect(response.body).toHaveProperty('server');
+      expect(response.body.server).toMatchSchema(productServerSchema);
+      expect(Array.isArray(response.body.benefits)).toBeTruthy();
+      expect(Array.isArray(response.body.commands)).toBeTruthy();
+
+      response.body.benefits.forEach((benefit: any) => {
+        expect(benefit).toMatchSchema(productBenefitSchema);
+      });
+
+      response.body.commands.forEach((command: any) => {
+        expect(command).toMatchSchema(productCommandSchema);
+      });
+    });
+
+    it('Deve retornar dados válidos', async () => {
+      const response = await request.get(`/product/${productsData[2].id}`);
+
+      expect(response.statusCode).toBe(200);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body.active).toBeFalsy();
+      expect(response.body.commands).toBeFalsy();
+      expect(response.body.server_id).toBeFalsy();
+      expect(response.body).toMatchSchema(productSchema);
+      expect(response.body).toHaveProperty('benefits');
+      expect(response.body).toHaveProperty('server');
+      expect(response.body.server).toMatchSchema(productServerSchema);
+      expect(Array.isArray(response.body.benefits)).toBeTruthy();
+
+      response.body.benefits.forEach((benefit: any) => {
+        expect(benefit).toMatchSchema(productBenefitSchema);
+      });
     });
   });
 });
