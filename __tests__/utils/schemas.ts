@@ -105,7 +105,7 @@ export const productSchema = {
       require: true,
     },
     active: {
-      type: 'boolean',
+      type: 'number',
       require: true,
     },
     created_at: {
