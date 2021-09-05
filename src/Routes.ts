@@ -52,6 +52,16 @@ routes.post('/product', ProductsController.create);
 routes.patch('/product/:id', ProductsController.update);
 routes.delete('/product/:id', ProductsController.delete);
 
+/* Product Benefits Routes */
+routes.post('/product/:id/benefit', UnavailableRoute);
+routes.patch('/product/:product_id/benefit/:benefit_id', UnavailableRoute);
+routes.delete('/product/:product_id/benefit/:benefit_id', UnavailableRoute);
+
+/* Product Commands Routes */
+routes.post('/product/:id/command', UnavailableRoute);
+routes.patch('/product/:product_id/command/:command_id', UnavailableRoute);
+routes.delete('/product/:product_id/command/:command_id', UnavailableRoute);
+
 /* Coupons Routes */
 routes.get('/coupons', UnavailableRoute);
 routes.get('/coupon/:code', UnavailableRoute);
