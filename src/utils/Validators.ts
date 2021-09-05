@@ -70,18 +70,4 @@ export const UpdateProductSchema = yup.object().shape({
   server_id: yup.string().trim(),
   price: yup.number().min(1),
   active: yup.boolean(),
-  benefits: yup.array().of(
-    yup.object().shape({
-      id: yup.string().required().min(4),
-      name: yup.string().trim().required().min(4).max(30),
-      description: yup.string().trim().required().min(4).max(60),
-    })
-  ),
-  commands: yup.array().of(
-    yup.object().shape({
-      id: yup.string().required().min(4),
-      name: yup.string().trim().required().min(4).max(30),
-      command: yup.string().trim().required().min(4).max(60),
-    })
-  ),
 });
