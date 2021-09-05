@@ -71,3 +71,8 @@ export const UpdateProductSchema = yup.object().shape({
   price: yup.number().min(1),
   active: yup.boolean(),
 });
+
+export const CreateProductBenefitSchema = yup.object().shape({
+  name: yup.string().trim().required().min(4).max(30),
+  description: yup.string().trim().required().min(4).max(60),
+});

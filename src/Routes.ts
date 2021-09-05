@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { AdminAuthController } from './controllers/AdminAuthController';
 import { AdminUsersController } from './controllers/AdminUsersController';
 import { AppController } from './controllers/AppController';
+import { ProductBenefitsController } from './controllers/ProductBenefitsController';
 import { ProductsController } from './controllers/ProductsController';
 import { ServersController } from './controllers/ServersController';
 import { TestsController } from './controllers/TestsController';
@@ -53,12 +54,12 @@ routes.patch('/product/:id', ProductsController.update);
 routes.delete('/product/:id', ProductsController.delete);
 
 /* Product Benefits Routes */
-routes.post('/product/:id/benefit', UnavailableRoute);
+routes.post('/product/:product_id/benefit', ProductBenefitsController.create);
 routes.patch('/product/:product_id/benefit/:benefit_id', UnavailableRoute);
 routes.delete('/product/:product_id/benefit/:benefit_id', UnavailableRoute);
 
 /* Product Commands Routes */
-routes.post('/product/:id/command', UnavailableRoute);
+routes.post('/product/:product_id/command', UnavailableRoute);
 routes.patch('/product/:product_id/command/:command_id', UnavailableRoute);
 routes.delete('/product/:product_id/command/:command_id', UnavailableRoute);
 
