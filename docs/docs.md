@@ -507,3 +507,37 @@ type ResponseBody = {
   deleted_at: null;
 };
 ```
+
+## POST _/product_
+
+Criar um produto
+
+_Precisa estar autenticado (Manager)_
+
+> Body
+
+```ts
+type RequestBody = {
+  name: string;
+  description: string;
+  image_url: string | undefined;
+  price: number;
+  server_id: string;
+  benefits: {
+    name: string;
+    description: string;
+  }[];
+  commands: {
+    name: string;
+    command: string;
+  }[];
+};
+```
+
+> Response
+
+```ts
+type ResponseBody = {
+  message: 'Successfully created';
+};
+```
