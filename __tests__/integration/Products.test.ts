@@ -2,12 +2,13 @@ import supertest from 'supertest';
 import { matchers } from 'jest-json-schema';
 
 import app from '../../src/App';
-import { runMigrations, runSeeds } from '../../src/database/Connection';
-import { Errors } from '../../src/utils/Response';
+import conn, { runMigrations, runSeeds } from '../../src/database/Connection';
+import { Errors, Success } from '../../src/utils/Response';
 import {
   createDefaultProducts,
   createDefaultServers,
   productsData,
+  serversData,
 } from '../utils/data';
 import {
   productSchema,
@@ -24,6 +25,15 @@ describe('Products Routes', () => {
   const userAgent = supertest.agent(app);
   const adminAgent = supertest.agent(app);
   const managerAgent = supertest.agent(app);
+
+  const newTestProduct = {
+    name: 'New product',
+    description: 'New product description',
+    price: 50,
+    server_id: serversData[1].id,
+    benefits: [{ name: 'Benefit 1', description: 'Benefit 1 description' }],
+    commands: [{ name: 'Command 1', command: 'command 1' }],
+  };
 
   beforeAll(async () => {
     await runMigrations();
@@ -280,6 +290,223 @@ describe('Products Routes', () => {
       response.body.benefits.forEach((benefit: any) => {
         expect(benefit).toMatchSchema(productBenefitSchema);
       });
+    });
+  });
+
+  describe('POST /product', () => {
+    it('Precisa estar conectado', async () => {
+      const response = await request.post('/product');
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NEED_AUTHENTICATE);
+    });
+
+    it('(User) Precisa ter permissão', async () => {
+      const response = await userAgent.post('/product');
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NO_PERMISSION);
+    });
+
+    it('(Admin) Precisa ter permissão', async () => {
+      const response = await adminAgent.post('/product');
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NO_PERMISSION);
+    });
+
+    it('(Manager) Requisição invalida', async () => {
+      const response = await managerAgent.post('/product');
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Requisição invalida (name undefined)', async () => {
+      const response = await managerAgent
+        .post('/product')
+        .send({ ...newTestProduct, name: undefined });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Requisição invalida (description undefined)', async () => {
+      const response = await managerAgent
+        .post('/product')
+        .send({ ...newTestProduct, description: undefined });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Requisição invalida (price undefined)', async () => {
+      const response = await managerAgent
+        .post('/product')
+        .send({ ...newTestProduct, price: undefined });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Requisição invalida (server_id undefined)', async () => {
+      const response = await managerAgent
+        .post('/product')
+        .send({ ...newTestProduct, server_id: undefined });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Requisição invalida (server_id invalid)', async () => {
+      const response = await managerAgent
+        .post('/product')
+        .send({ ...newTestProduct, server_id: 'not_exists' });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Requisição invalida (benefits undefined)', async () => {
+      const response = await managerAgent
+        .post('/product')
+        .send({ ...newTestProduct, benefits: undefined });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Requisição invalida (benefits invalid)', async () => {
+      const response = await managerAgent
+        .post('/product')
+        .send({ ...newTestProduct, benefits: 'invalid' });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Requisição invalida (commands undefined)', async () => {
+      const response = await managerAgent
+        .post('/product')
+        .send({ ...newTestProduct, commands: undefined });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Requisição invalida (commands invalid)', async () => {
+      const response = await managerAgent
+        .post('/product')
+        .send({ ...newTestProduct, commands: 'invalid' });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Criar produto', async () => {
+      const response = await managerAgent
+        .post('/product')
+        .send({ ...newTestProduct, name: newTestProduct.name + ' - 1' });
+
+      expect(response.statusCode).toBe(201);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('message', Success.CREATED);
+
+      const { id: productID }: { id: string | undefined } = await conn(
+        'products'
+      )
+        .select('id')
+        .where('name', newTestProduct.name + ' - 1')
+        .first();
+
+      expect(productID).toBeTruthy();
+
+      const benefits = await conn('products_benefits')
+        .select('id')
+        .where('product_id', productID);
+
+      const commands = await conn('products_commands')
+        .select('id')
+        .where('product_id', productID);
+
+      expect(benefits.length).toBe(1);
+      expect(commands.length).toBe(1);
+    });
+
+    it('(Manager) Criar produto (sem benefits e commands)', async () => {
+      const response = await managerAgent.post('/product').send({
+        ...newTestProduct,
+        name: newTestProduct.name + ' - 2',
+        benefits: [],
+        commands: [],
+      });
+
+      expect(response.statusCode).toBe(201);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('message', Success.CREATED);
+
+      const { id: productID }: { id: string | undefined } = await conn(
+        'products'
+      )
+        .select('id')
+        .where('name', newTestProduct.name + ' - 2')
+        .first();
+
+      expect(productID).toBeTruthy();
+
+      const benefits = await conn('products_benefits')
+        .select('id')
+        .where('product_id', productID);
+
+      const commands = await conn('products_commands')
+        .select('id')
+        .where('product_id', productID);
+
+      expect(benefits.length).toBe(0);
+      expect(commands.length).toBe(0);
     });
   });
 });

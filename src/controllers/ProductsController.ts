@@ -182,7 +182,7 @@ export const ProductsController = {
       server_id,
     } = req.body as CreateProductData;
 
-    const bodyData = {
+    const requestData = {
       name,
       benefits,
       commands,
@@ -193,21 +193,18 @@ export const ProductsController = {
     };
 
     // Dados formatados
-    let data: CreateProductData | undefined;
+    let data: CreateProductData;
 
     // Validar dados
     try {
-      CreateProductSchema.validateSync(bodyData, { abortEarly: false });
-
-      data = CreateProductSchema.cast(bodyData) as any;
+      CreateProductSchema.validateSync(requestData, { abortEarly: false });
     } catch (err: any) {
       return res
         .status(400)
         .json({ error: Errors.INVALID_REQUEST, errors: err.errors });
     }
 
-    // Se o cast dos dados falhar
-    if (!data) return res.status(500).json({ error: Errors.INTERNAL_ERROR });
+    data = CreateProductSchema.cast(requestData) as any;
 
     // Validar id do servidor de relacionamento
     const serverExists: ServerData | undefined = await conn('servers')
@@ -216,7 +213,7 @@ export const ProductsController = {
       .first();
 
     if (!serverExists)
-      return res.status(404).json({ error: Errors.INVALID_REQUEST });
+      return res.status(400).json({ error: Errors.INVALID_REQUEST });
 
     // Dados a serem inseridos
     const productData = {
