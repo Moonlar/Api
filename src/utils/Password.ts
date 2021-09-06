@@ -23,8 +23,6 @@ export function random(length: number = 12): string {
     .map(() => CHARS[randomNumber(0, CHARS.length)])
     .join('');
 
-  console.log(password);
-
   return password;
 }
 
