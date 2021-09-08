@@ -26,6 +26,11 @@ describe('Products Routes', () => {
   const adminAgent = supertest.agent(app);
   const managerAgent = supertest.agent(app);
 
+  const testProductIDs = {
+    a: '',
+    b: '',
+  };
+
   const newTestProduct = {
     name: 'New product',
     description: 'New product description',
@@ -472,6 +477,8 @@ describe('Products Routes', () => {
 
       expect(benefits.length).toBe(1);
       expect(commands.length).toBe(1);
+
+      testProductIDs.a = productID as string;
     });
 
     it('(Manager) Criar produto (sem benefits e commands)', async () => {
@@ -507,6 +514,106 @@ describe('Products Routes', () => {
 
       expect(benefits.length).toBe(0);
       expect(commands.length).toBe(0);
+
+      testProductIDs.b = productID as string;
+    });
+  });
+
+  describe('PATCH /product/:id', () => {
+    it('Precisa estar conectado', async () => {
+      const response = await request.patch('/product/invalid');
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NEED_AUTHENTICATE);
+    });
+
+    it('(User) Sem permissão', async () => {
+      const response = await userAgent.patch('/product/invalid');
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NO_PERMISSION);
+    });
+
+    it('(Admin) Sem permissão', async () => {
+      const response = await adminAgent.patch('/product/invalid');
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NO_PERMISSION);
+    });
+
+    it('(Manager) Requisição invalida', async () => {
+      const response = await managerAgent.patch('/product/invalid');
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Produto não encontrado', async () => {
+      const response = await managerAgent
+        .patch('/product/invalid')
+        .send({ name: 'Invalid' });
+
+      expect(response.statusCode).toBe(404);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NOT_FOUND);
+    });
+
+    it('(Manager) Produto não encontrado (removido)', async () => {
+      const response = await managerAgent
+        .patch(`/product/${productsData[0].id}`)
+        .send({ name: 'Invalid' });
+
+      expect(response.statusCode).toBe(404);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NOT_FOUND);
+    });
+
+    it('(Manager) Dados da requisição inválidos', async () => {
+      const response = await managerAgent
+        .patch(`/product/${productsData[2].id}`)
+        .send({ name: '', price: 'invalid', active: 'invalid' });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Atualizar dados', async () => {
+      const response = await managerAgent
+        .patch(`/product/${testProductIDs.a}`)
+        .send({ name: 'Updated 1', active: true });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('message', Success.UPDATED);
+
+      const data = await conn('products')
+        .select(['name', 'active'])
+        .where('id', testProductIDs.a)
+        .first();
+
+      expect(data).toHaveProperty('name', 'Updated 1');
+      expect(data).toHaveProperty('active', 1);
     });
   });
 });

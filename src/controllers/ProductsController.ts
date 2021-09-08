@@ -293,36 +293,24 @@ export const ProductsController = {
 
     // Validar dados
     let data: UpdateProductData | undefined;
+    const bodyData = {
+      name,
+      description,
+      image_url,
+      server_id,
+      active,
+      price,
+    };
 
     try {
-      UpdateProductSchema.validateSync(
-        {
-          name,
-          description,
-          image_url,
-          server_id,
-          price,
-          active,
-        },
-        { abortEarly: false }
-      );
-
-      data = UpdateProductSchema.cast({
-        name,
-        description,
-        image_url,
-        server_id,
-        active,
-        price,
-      }) as any;
+      UpdateProductSchema.validateSync(bodyData, { abortEarly: false });
     } catch (err: any) {
       return res
         .status(400)
         .json({ error: Errors.INVALID_REQUEST, errors: err.errors });
     }
 
-    // Caso o cast falhe
-    if (!data) return res.status(500).json({ error: Errors.INTERNAL_ERROR });
+    data = UpdateProductSchema.cast(bodyData) as any;
 
     // Atualizar dados
     await conn('products').where('id', id).update(data);
