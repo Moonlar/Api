@@ -498,7 +498,7 @@ describe('Server Routes', () => {
       const wasDeleted = await conn('servers')
         .select('id')
         .where('id', serversData[1].id)
-        .where('deleted_at', '!=', null)
+        .where('deleted_at', null)
         .first();
 
       expect(wasDeleted).toBeFalsy();
