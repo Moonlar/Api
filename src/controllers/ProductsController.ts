@@ -331,7 +331,8 @@ export const ProductsController = {
     const productExist = await conn('products')
       .select('id')
       .where('id', id)
-      .where('deleted_at', null);
+      .where('deleted_at', null)
+      .first();
 
     if (!productExist) return res.status(404).json({ error: Errors.NOT_FOUND });
 
@@ -343,7 +344,7 @@ export const ProductsController = {
 
     try {
       await Promise.all([
-        trx('product')
+        trx('products')
           .update({
             name: deletedField,
             description: deletedField,
@@ -354,14 +355,14 @@ export const ProductsController = {
             deleted_at: conn.fn.now(),
           })
           .where('id', id),
-        trx('product_benefits')
+        trx('products_benefits')
           .update({
             name: deletedField,
             description: deletedField,
             deleted_at: conn.fn.now(),
           })
           .where('product_id', id),
-        trx('product_commands')
+        trx('products_commands')
           .update({
             name: deletedField,
             command: deletedField,

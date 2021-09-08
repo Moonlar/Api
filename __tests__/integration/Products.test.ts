@@ -616,4 +616,68 @@ describe('Products Routes', () => {
       expect(data).toHaveProperty('active', 1);
     });
   });
+
+  describe('DELETE /product/:id', () => {
+    it('Deve estar conectado para remover produtos', async () => {
+      const response = await request.delete(`/product/${testProductIDs.a}`);
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NEED_AUTHENTICATE);
+    });
+
+    it('(User) Deve ter permissão para isso', async () => {
+      const response = await userAgent.delete(`/product/${testProductIDs.a}`);
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NO_PERMISSION);
+    });
+
+    it('(Admin) Deve ter permissão para isso', async () => {
+      const response = await adminAgent.delete(`/product/${testProductIDs.a}`);
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NO_PERMISSION);
+    });
+
+    it('(Manager) Deve retornar que produto não foi encontrado', async () => {
+      const response = await managerAgent.delete(
+        `/product/${productsData[0].id}`
+      );
+
+      expect(response.statusCode).toBe(404);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NOT_FOUND);
+    });
+
+    it('(Manager) Deve remover produto', async () => {
+      const response = await managerAgent.delete(
+        `/product/${testProductIDs.a}`
+      );
+
+      expect(response.statusCode).toBe(200);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('message', Success.DELETED);
+
+      const wasDeleted = await conn('products')
+        .select('id')
+        .where('id', testProductIDs.a)
+        .where('deleted_at', null)
+        .first();
+
+      expect(wasDeleted).toBeFalsy();
+    });
+  });
 });
