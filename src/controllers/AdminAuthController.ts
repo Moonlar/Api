@@ -36,8 +36,6 @@ export const AdminAuthController = {
 
     // Dados de login
     let { email, password } = req.body as CreateAuthData;
-    if (email) email = email.trim();
-    if (password) password = password.trim();
 
     // Validar dados
     try {
@@ -45,23 +43,26 @@ export const AdminAuthController = {
         { email, password },
         { abortEarly: false }
       );
-    } catch (err) {
+    } catch (err: any) {
       return res
         .status(400)
         .json({ error: Errors.INVALID_REQUEST, errors: err.errors });
     }
 
+    // Formatar dados
+    const data = AdminUserLogInSchema.cast({ email, password });
+
     // Verificar se o usuário existe
     const user: AdminUserData = await conn('admin_users')
       .select('*')
-      .where('email', email)
+      .where('email', data.email)
       .where('deleted_at', null)
       .first();
 
     if (!user) return res.status(404).json({ error: Errors.NOT_FOUND });
 
     // Testar senha
-    if (!Password.compare(user.password, String(password))) {
+    if (!Password.compare(user.password, data.password!)) {
       return res.status(401).json({ error: Errors.WRONG_PASSWORD });
     }
 

@@ -22,8 +22,8 @@ export const UpdateAdminUserSchema = yup.object().shape({
 });
 
 export const AdminUserLogInSchema = yup.object().shape({
-  email: yup.string().required().email(),
-  password: yup.string().required().min(6).max(20),
+  email: yup.string().required().trim().lowercase().email(),
+  password: yup.string().required().trim().min(6).max(20),
 });
 
 export const CreateServerSchema = yup.object().shape({
