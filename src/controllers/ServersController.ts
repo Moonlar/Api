@@ -94,7 +94,7 @@ export const ServersController = {
       CreateServerSchema.validateSync(bodyData, { abortEarly: false });
 
       data = CreateServerSchema.cast(bodyData) as any;
-    } catch (err) {
+    } catch (err: any) {
       return res
         .status(400)
         .json({ error: Errors.INVALID_REQUEST, errors: err.errors });
@@ -159,7 +159,7 @@ export const ServersController = {
       );
 
       data = UpdateServerSchema.cast({ name, description }) as any;
-    } catch (err) {
+    } catch (err: any) {
       return res
         .status(400)
         .json({ error: Errors.INVALID_REQUEST, errors: err.errors });

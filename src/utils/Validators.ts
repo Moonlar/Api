@@ -76,3 +76,8 @@ export const CreateProductBenefitSchema = yup.object().shape({
   name: yup.string().trim().required().min(4).max(30),
   description: yup.string().trim().required().min(4).max(60),
 });
+
+export const UpdateProductBenefitSchema = yup.object().shape({
+  name: yup.string().trim().min(4).max(30),
+  description: yup.string().trim().min(4).max(60),
+});

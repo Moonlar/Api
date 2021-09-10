@@ -33,7 +33,7 @@ export const Auth = async (req: Request, res: Response, next: NextFunction) => {
 
       req.isAuth = true;
       req.user = result;
-    } catch (err) {
+    } catch (err: any) {
       switch (err.message) {
         case 'jwt expired' || 'jwt not active':
           res.status(401).json({ error: Errors.EXPIRED_TOKEN });
