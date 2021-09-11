@@ -81,3 +81,13 @@ export const UpdateProductBenefitSchema = yup.object().shape({
   name: yup.string().trim().min(4).max(30),
   description: yup.string().trim().min(4).max(60),
 });
+
+export const CreateProductCommandSchema = yup.object().shape({
+  name: yup.string().trim().required().min(4).max(30),
+  command: yup.string().trim().required().min(4).max(60),
+});
+
+export const UpdateProductCommandSchema = yup.object().shape({
+  name: yup.string().trim().min(4).max(30),
+  command: yup.string().trim().min(4).max(60),
+});
