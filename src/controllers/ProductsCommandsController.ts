@@ -3,10 +3,7 @@ import { ValidationError } from 'yup';
 
 import conn from '../database/Connection';
 import { Errors, Success } from '../utils/Response';
-import {
-  CreateProductCommandSchema,
-  UpdateProductCommandSchema,
-} from '../utils/Validators';
+import { CreateProductCommandSchema, UpdateProductCommandSchema } from '../utils/Validators';
 
 import { Controller } from '../typings';
 
@@ -29,10 +26,7 @@ export const ProductsCommandsController = {
 
     // Validar dados
     try {
-      CreateProductCommandSchema.validateSync(
-        { name, command },
-        { abortEarly: false }
-      );
+      CreateProductCommandSchema.validateSync({ name, command }, { abortEarly: false });
     } catch (err) {
       if (err instanceof ValidationError)
         return res.status(400).json({ error: Errors.INVALID_REQUEST });
@@ -50,8 +44,7 @@ export const ProductsCommandsController = {
       .where('id', product_id)
       .first();
 
-    if (!productExists)
-      return res.status(404).json({ error: Errors.NOT_FOUND });
+    if (!productExists) return res.status(404).json({ error: Errors.NOT_FOUND });
 
     // Fazer o cast dos dados
     const data = CreateProductCommandSchema.cast({ name, command });
@@ -74,25 +67,25 @@ export const ProductsCommandsController = {
     const { command, name } = req.body as CommandBody;
 
     // Verificar se foram passados dados
-    if (!command && !name)
-      return res.status(400).json({ error: Errors.INVALID_REQUEST });
+    if (!command && !name) return res.status(400).json({ error: Errors.INVALID_REQUEST });
 
-    // Verificar se o ID existe
-    const { id } = req.params;
+    // Verificar se os IDs são válidos
+    const { product_id, command_id } = req.params;
 
-    const dataExist = await conn('products_commands')
-      .select('*')
-      .where('id', id)
-      .first();
+    const [commandExists, productExists] = await Promise.all([
+      conn('products_commands')
+        .select('*')
+        .where('id', command_id)
+        .where('deleted_at', null)
+        .first(),
+      conn('products').select('*').where('id', product_id).where('deleted_at', null).first(),
+    ]);
 
-    if (!dataExist) return res.status(404).json({ error: Errors.NOT_FOUND });
+    if (!commandExists || !productExists) return res.status(404).json({ error: Errors.NOT_FOUND });
 
     // Validar dados
     try {
-      UpdateProductCommandSchema.validateSync(
-        { command, name },
-        { abortEarly: false }
-      );
+      UpdateProductCommandSchema.validateSync({ command, name }, { abortEarly: false });
     } catch (err) {
       if (err instanceof ValidationError)
         return res.status(400).json({ error: Errors.INVALID_REQUEST });
@@ -105,7 +98,7 @@ export const ProductsCommandsController = {
     // Formatar dados
     const data = UpdateProductCommandSchema.cast({ command, name });
 
-    await conn('products_commands').update(data).where('id', id);
+    await conn('products_commands').update(data).where('id', command_id);
 
     return res.json({ message: Success.UPDATED });
   },
@@ -118,13 +111,10 @@ export const ProductsCommandsController = {
     if (req.user?.permission !== 'manager')
       return res.status(401).json({ error: Errors.NO_PERMISSION });
 
-    // Verificar se o ID existe
-    const { id } = req.params;
+    // Verificar se o ID é válido
+    const { command_id } = req.params;
 
-    const dataExist = await conn('products_commands')
-      .select('*')
-      .where('id', id)
-      .first();
+    const dataExist = await conn('products_commands').select('*').where('id', command_id).first();
 
     if (!dataExist) return res.status(404).json({ error: Errors.NOT_FOUND });
 
@@ -137,7 +127,7 @@ export const ProductsCommandsController = {
         command: deletedField,
         deleted_at: conn.fn.now(),
       })
-      .where('id', id);
+      .where('id', command_id);
 
     return res.json({ message: Success.DELETED });
   },

@@ -3,10 +3,7 @@ import { ValidationError } from 'yup';
 
 import conn from '../database/Connection';
 import { Errors, Success } from '../utils/Response';
-import {
-  CreateProductBenefitSchema,
-  UpdateProductBenefitSchema,
-} from '../utils/Validators';
+import { CreateProductBenefitSchema, UpdateProductBenefitSchema } from '../utils/Validators';
 
 import { Controller } from '../typings';
 
@@ -29,10 +26,7 @@ export const ProductsBenefitsController = {
 
     // Validar dados
     try {
-      CreateProductBenefitSchema.validateSync(
-        { name, description },
-        { abortEarly: false }
-      );
+      CreateProductBenefitSchema.validateSync({ name, description }, { abortEarly: false });
     } catch (err) {
       if (err instanceof ValidationError)
         return res.status(400).json({ error: Errors.INVALID_REQUEST });
@@ -50,8 +44,7 @@ export const ProductsBenefitsController = {
       .where('id', product_id)
       .first();
 
-    if (!productExists)
-      return res.status(404).json({ error: Errors.NOT_FOUND });
+    if (!productExists) return res.status(404).json({ error: Errors.NOT_FOUND });
 
     // Fazer o cast dos dados
     const data = CreateProductBenefitSchema.cast({ name, description });
@@ -74,25 +67,25 @@ export const ProductsBenefitsController = {
     const { description, name } = req.body as BenefitBody;
 
     // Verificar se foram passados dados
-    if (!description && !name)
-      return res.status(400).json({ error: Errors.INVALID_REQUEST });
+    if (!description && !name) return res.status(400).json({ error: Errors.INVALID_REQUEST });
 
-    // Verificar se o ID existe
-    const { id } = req.params;
+    // Verificar se os IDs passados são válidos
+    const { product_id, benefit_id } = req.params;
 
-    const dataExist = await conn('products_benefits')
-      .select('*')
-      .where('id', id)
-      .first();
+    const [benefitExists, productExists] = await Promise.all([
+      conn('products_benefits')
+        .select('*')
+        .where('id', benefit_id)
+        .where('deleted_at', null)
+        .first(),
+      conn('products').select('*').where('id', product_id).where('deleted_at', null).first(),
+    ]);
 
-    if (!dataExist) return res.status(404).json({ error: Errors.NOT_FOUND });
+    if (!benefitExists || !productExists) return res.status(404).json({ error: Errors.NOT_FOUND });
 
     // Validar dados
     try {
-      UpdateProductBenefitSchema.validateSync(
-        { description, name },
-        { abortEarly: false }
-      );
+      UpdateProductBenefitSchema.validateSync({ description, name }, { abortEarly: false });
     } catch (err) {
       if (err instanceof ValidationError)
         return res.status(400).json({ error: Errors.INVALID_REQUEST });
@@ -105,7 +98,7 @@ export const ProductsBenefitsController = {
     // Formatar dados
     const data = UpdateProductBenefitSchema.cast({ description, name });
 
-    await conn('products_benefits').update(data).where('id', id);
+    await conn('products_benefits').update(data).where('id', benefit_id);
 
     return res.json({ message: Success.UPDATED });
   },
@@ -119,14 +112,15 @@ export const ProductsBenefitsController = {
       return res.status(401).json({ error: Errors.NO_PERMISSION });
 
     // Verificar se o ID existe
-    const { id } = req.params;
+    const { benefit_id } = req.params;
 
-    const dataExist = await conn('products_benefits')
+    const benefitExists = await conn('products_benefits')
       .select('*')
-      .where('id', id)
+      .where('id', benefit_id)
+      .where('deleted_at', null)
       .first();
 
-    if (!dataExist) return res.status(404).json({ error: Errors.NOT_FOUND });
+    if (!benefitExists) return res.status(404).json({ error: Errors.NOT_FOUND });
 
     // Remover dados
     const deletedField = 'deleted_' + Date.now().toString();
@@ -137,7 +131,7 @@ export const ProductsBenefitsController = {
         description: deletedField,
         deleted_at: conn.fn.now(),
       })
-      .where('id', id);
+      .where('id', benefit_id);
 
     return res.json({ message: Success.DELETED });
   },
