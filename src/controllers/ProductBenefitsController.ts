@@ -109,4 +109,36 @@ export const ProductBenefitsController = {
 
     return res.json({ message: Success.UPDATED });
   },
+
+  async delete(req, res) {
+    // Se não estiver conectado
+    if (!req.isAuth) return res.authError();
+
+    // Se não tiver permissão
+    if (req.user?.permission !== 'manager')
+      return res.status(401).json({ error: Errors.NO_PERMISSION });
+
+    // Verificar se o ID existe
+    const { id } = req.params;
+
+    const dataExist = await conn('products_benefits')
+      .select('*')
+      .where('id', id)
+      .first();
+
+    if (!dataExist) return res.status(404).json({ error: Errors.NOT_FOUND });
+
+    // Remover dados
+    const deletedField = 'deleted_' + Date.now().toString();
+
+    await conn('products_benefits')
+      .update({
+        name: deletedField,
+        description: deletedField,
+        deleted_at: conn.fn.now(),
+      })
+      .where('id', id);
+
+    return res.json({ message: Success.DELETED });
+  },
 } as Controller;
