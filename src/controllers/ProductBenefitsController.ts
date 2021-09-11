@@ -15,7 +15,7 @@ interface BenefitBody {
   description?: string;
 }
 
-export const ProductBenefitsController = {
+export const ProductsBenefitsController = {
   async create(req, res) {
     // Se não estiver conectado
     if (!req.isAuth) return res.authError();
