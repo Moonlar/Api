@@ -100,6 +100,13 @@ const getProductRelated = (id: string) => ({
       name: 'Benefit 2',
       description: 'Benefit 2',
     },
+    {
+      id: uuid(),
+      product_id: id,
+      name: 'Benefit 3',
+      description: 'Benefit 3',
+      deleted_at: conn.fn.now(),
+    },
   ],
   commands: [
     {
@@ -113,6 +120,13 @@ const getProductRelated = (id: string) => ({
       product_id: id,
       name: 'Command 2',
       command: 'command 2',
+    },
+    {
+      id: uuid(),
+      product_id: id,
+      name: 'Command 3',
+      command: 'command 3',
+      deleted_at: conn.fn.now(),
     },
   ],
 });
