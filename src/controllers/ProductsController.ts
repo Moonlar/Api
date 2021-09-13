@@ -4,13 +4,7 @@ import conn from '../database/Connection';
 import { CreateProductSchema, UpdateProductSchema } from '../utils/Validators';
 import { Errors, Success } from '../utils/Response';
 
-import {
-  BenefitData,
-  CommandData,
-  Controller,
-  ProductData,
-  ServerData,
-} from '../typings';
+import { BenefitData, CommandData, Controller, ProductData, ServerData } from '../typings';
 
 interface CreateProductData {
   name: string;
@@ -130,19 +124,22 @@ export const ProductsController = {
     // Benefícios dos produtos
     const benefits: BenefitData[] = await conn('products_benefits')
       .select(['id', 'name', 'description'])
-      .where('product_id', id);
+      .where('product_id', id)
+      .where('deleted_at', null);
 
     // Commandos de ativação dos produtos
     const commands: CommandData[] = isAdmin
       ? await conn('products_commands')
           .select(['id', 'name', 'command'])
           .where('product_id', id)
+          .where('deleted_at', null)
       : [];
 
     // Servidor do produto
     const server = await conn('servers')
       .select(['id', 'name', 'description'])
       .where('id', product.server_id)
+      .where('deleted_at', null)
       .first();
 
     // Retornar dados formatados
@@ -172,15 +169,8 @@ export const ProductsController = {
       return res.status(401).json({ error: Errors.NO_PERMISSION });
 
     // Dados da requisição
-    const {
-      name,
-      benefits,
-      commands,
-      description,
-      image_url,
-      price,
-      server_id,
-    } = req.body as CreateProductData;
+    const { name, benefits, commands, description, image_url, price, server_id } =
+      req.body as CreateProductData;
 
     const requestData = {
       name,
@@ -199,9 +189,7 @@ export const ProductsController = {
     try {
       CreateProductSchema.validateSync(requestData, { abortEarly: false });
     } catch (err: any) {
-      return res
-        .status(400)
-        .json({ error: Errors.INVALID_REQUEST, errors: err.errors });
+      return res.status(400).json({ error: Errors.INVALID_REQUEST, errors: err.errors });
     }
 
     data = CreateProductSchema.cast(requestData) as any;
@@ -210,10 +198,10 @@ export const ProductsController = {
     const serverExists: ServerData | undefined = await conn('servers')
       .select('id')
       .where('id', server_id)
+      .where('deleted_at', null)
       .first();
 
-    if (!serverExists)
-      return res.status(400).json({ error: Errors.INVALID_REQUEST });
+    if (!serverExists) return res.status(400).json({ error: Errors.INVALID_REQUEST });
 
     // Dados a serem inseridos
     const productData = {
@@ -288,8 +276,7 @@ export const ProductsController = {
       .where('deleted_at', null)
       .first();
 
-    if (!productExists)
-      return res.status(404).json({ error: Errors.NOT_FOUND });
+    if (!productExists) return res.status(404).json({ error: Errors.NOT_FOUND });
 
     // Validar dados
     let data: UpdateProductData | undefined;
@@ -305,9 +292,7 @@ export const ProductsController = {
     try {
       UpdateProductSchema.validateSync(bodyData, { abortEarly: false });
     } catch (err: any) {
-      return res
-        .status(400)
-        .json({ error: Errors.INVALID_REQUEST, errors: err.errors });
+      return res.status(400).json({ error: Errors.INVALID_REQUEST, errors: err.errors });
     }
 
     data = UpdateProductSchema.cast(bodyData) as any;
