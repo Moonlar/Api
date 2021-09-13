@@ -135,9 +135,7 @@ describe('Products Routes', () => {
     });
 
     it('Deve retornar dados válidos com parâmetros de busca (search)', async () => {
-      const response = await request
-        .get('/products')
-        .query({ search: 'invalid' });
+      const response = await request.get('/products').query({ search: 'invalid' });
 
       expect(response.statusCode).toBe(200);
       expect(response.headers).toBeTruthy();
@@ -294,6 +292,61 @@ describe('Products Routes', () => {
 
       response.body.benefits.forEach((benefit: any) => {
         expect(benefit).toMatchSchema(productBenefitSchema);
+        expect(benefit).toHaveProperty('deleted_at', undefined);
+      });
+    });
+
+    it('(Admin) Deve retornar dados válidos', async () => {
+      const response = await adminAgent.get(`/product/${productsData[2].id}`);
+
+      expect(response.statusCode).toBe(200);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body.active).toBeTruthy();
+      expect(response.body.server_id).toBeFalsy();
+      expect(response.body).toMatchSchema(productSchema);
+      expect(response.body).toHaveProperty('benefits');
+      expect(response.body).toHaveProperty('server');
+      expect(response.body.server).toMatchSchema(productServerSchema);
+      expect(Array.isArray(response.body.benefits)).toBeTruthy();
+      expect(Array.isArray(response.body.commands)).toBeTruthy();
+
+      response.body.benefits.forEach((benefit: any) => {
+        expect(benefit).toMatchSchema(productBenefitSchema);
+        expect(benefit).toHaveProperty('deleted_at', undefined);
+      });
+
+      response.body.commands.forEach((command: any) => {
+        expect(command).toMatchSchema(productCommandSchema);
+        expect(command).toHaveProperty('deleted_at', undefined);
+      });
+    });
+
+    it('(Manager) Deve retornar dados válidos', async () => {
+      const response = await managerAgent.get(`/product/${productsData[2].id}`);
+
+      expect(response.statusCode).toBe(200);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body.active).toBeTruthy();
+      expect(response.body.server_id).toBeFalsy();
+      expect(response.body).toMatchSchema(productSchema);
+      expect(response.body).toHaveProperty('benefits');
+      expect(response.body).toHaveProperty('server');
+      expect(response.body.server).toMatchSchema(productServerSchema);
+      expect(Array.isArray(response.body.benefits)).toBeTruthy();
+      expect(Array.isArray(response.body.commands)).toBeTruthy();
+
+      response.body.benefits.forEach((benefit: any) => {
+        expect(benefit).toMatchSchema(productBenefitSchema);
+        expect(benefit).toHaveProperty('deleted_at', undefined);
+      });
+
+      response.body.commands.forEach((command: any) => {
+        expect(command).toMatchSchema(productCommandSchema);
+        expect(command).toHaveProperty('deleted_at', undefined);
       });
     });
   });
@@ -458,22 +511,16 @@ describe('Products Routes', () => {
       expect(response.body).toBeTruthy();
       expect(response.body).toHaveProperty('message', Success.CREATED);
 
-      const { id: productID }: { id: string | undefined } = await conn(
-        'products'
-      )
+      const { id: productID }: { id: string | undefined } = await conn('products')
         .select('id')
         .where('name', newTestProduct.name + ' - 1')
         .first();
 
       expect(productID).toBeTruthy();
 
-      const benefits = await conn('products_benefits')
-        .select('id')
-        .where('product_id', productID);
+      const benefits = await conn('products_benefits').select('id').where('product_id', productID);
 
-      const commands = await conn('products_commands')
-        .select('id')
-        .where('product_id', productID);
+      const commands = await conn('products_commands').select('id').where('product_id', productID);
 
       expect(benefits.length).toBe(1);
       expect(commands.length).toBe(1);
@@ -495,22 +542,16 @@ describe('Products Routes', () => {
       expect(response.body).toBeTruthy();
       expect(response.body).toHaveProperty('message', Success.CREATED);
 
-      const { id: productID }: { id: string | undefined } = await conn(
-        'products'
-      )
+      const { id: productID }: { id: string | undefined } = await conn('products')
         .select('id')
         .where('name', newTestProduct.name + ' - 2')
         .first();
 
       expect(productID).toBeTruthy();
 
-      const benefits = await conn('products_benefits')
-        .select('id')
-        .where('product_id', productID);
+      const benefits = await conn('products_benefits').select('id').where('product_id', productID);
 
-      const commands = await conn('products_commands')
-        .select('id')
-        .where('product_id', productID);
+      const commands = await conn('products_commands').select('id').where('product_id', productID);
 
       expect(benefits.length).toBe(0);
       expect(commands.length).toBe(0);
@@ -561,9 +602,7 @@ describe('Products Routes', () => {
     });
 
     it('(Manager) Produto não encontrado', async () => {
-      const response = await managerAgent
-        .patch('/product/invalid')
-        .send({ name: 'Invalid' });
+      const response = await managerAgent.patch('/product/invalid').send({ name: 'Invalid' });
 
       expect(response.statusCode).toBe(404);
       expect(response.headers).toBeTruthy();
@@ -649,9 +688,7 @@ describe('Products Routes', () => {
     });
 
     it('(Manager) Deve retornar que produto não foi encontrado', async () => {
-      const response = await managerAgent.delete(
-        `/product/${productsData[0].id}`
-      );
+      const response = await managerAgent.delete(`/product/${productsData[0].id}`);
 
       expect(response.statusCode).toBe(404);
       expect(response.headers).toBeTruthy();
@@ -661,9 +698,7 @@ describe('Products Routes', () => {
     });
 
     it('(Manager) Deve remover produto', async () => {
-      const response = await managerAgent.delete(
-        `/product/${testProductIDs.a}`
-      );
+      const response = await managerAgent.delete(`/product/${testProductIDs.a}`);
 
       expect(response.statusCode).toBe(200);
       expect(response.headers).toBeTruthy();
