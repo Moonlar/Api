@@ -42,6 +42,7 @@ export const ProductsBenefitsController = {
     const productExists: string | undefined = await conn('products')
       .select('id')
       .where('id', product_id)
+      .where('deleted_at', null)
       .first();
 
     if (!productExists) return res.status(404).json({ error: Errors.NOT_FOUND });
