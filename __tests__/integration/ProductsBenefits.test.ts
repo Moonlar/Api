@@ -27,7 +27,7 @@ describe('Product Benefits Routes', () => {
     await managerAgent.get('/test/token/manager');
   });
 
-  describe('POST /:product_id', () => {
+  describe('POST /:product_id/benefit', () => {
     it('Precisa estar conectado', async () => {
       const response = await request.post(`/product/${productsData[2].id}/benefit/`);
 
@@ -135,6 +135,124 @@ describe('Product Benefits Routes', () => {
 
       expect(createdBenefit).toBeTruthy();
       expect(createdBenefit).toHaveProperty('id');
+
+      benefitID = createdBenefit.id;
+    });
+  });
+
+  describe('PATCH /:product_id/benefit/:benefit_id', () => {
+    it('Precisa estar conectado', async () => {
+      const response = await request.patch(`/product/${productsData[2].id}/benefit/${benefitID}`);
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NEED_AUTHENTICATE);
+    });
+
+    it('(User) Precisa permissão', async () => {
+      const response = await userAgent.patch(`/product/${productsData[2].id}/benefit/${benefitID}`);
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NO_PERMISSION);
+    });
+
+    it('(Admin) Precisa permissão', async () => {
+      const response = await adminAgent.patch(
+        `/product/${productsData[2].id}/benefit/${benefitID}`
+      );
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NO_PERMISSION);
+    });
+
+    it('(Manager) Dados inválidos', async () => {
+      const response = await managerAgent.patch(
+        `/product/${productsData[2].id}/benefit/${benefitID}`
+      );
+
+      expect(response.statusCode).toBe(400);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.INVALID_REQUEST);
+    });
+
+    it('(Manager) Dados inválidos (invalid product)', async () => {
+      const response = await managerAgent
+        .patch(`/product/invalid/benefit/${benefitID}`)
+        .send({ name: 'Updated benefit' });
+
+      expect(response.statusCode).toBe(404);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NOT_FOUND);
+    });
+
+    it('(Manager) Dados inválidos (deleted product)', async () => {
+      const response = await managerAgent
+        .patch(`/product/${productsData[0].id}/benefit/${benefitID}`)
+        .send({ name: 'Updated benefit' });
+
+      expect(response.statusCode).toBe(404);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NOT_FOUND);
+    });
+
+    it('(Manager) Atualizar benefício (name)', async () => {
+      const response = await managerAgent
+        .patch(`/product/${productsData[2].id}/benefit/${benefitID}`)
+        .send({ name: 'Updated benefit 4' });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('message', Success.UPDATED);
+
+      const createdBenefit = await conn('products_benefits')
+        .select(['id', 'name'])
+        .where('id', benefitID)
+        .where('deleted_at', null)
+        .first();
+
+      expect(createdBenefit).toBeTruthy();
+      expect(createdBenefit).toHaveProperty('id');
+      expect(createdBenefit).toHaveProperty('name', 'Updated benefit 4');
+
+      benefitID = createdBenefit.id;
+    });
+
+    it('(Manager) Atualizar benefício (description)', async () => {
+      const response = await managerAgent
+        .patch(`/product/${productsData[2].id}/benefit/${benefitID}`)
+        .send({ description: 'Updated benefit 4' });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('message', Success.UPDATED);
+
+      const createdBenefit = await conn('products_benefits')
+        .select(['id', 'description'])
+        .where('id', benefitID)
+        .where('deleted_at', null)
+        .first();
+
+      expect(createdBenefit).toBeTruthy();
+      expect(createdBenefit).toHaveProperty('id');
+      expect(createdBenefit).toHaveProperty('description', 'Updated benefit 4');
 
       benefitID = createdBenefit.id;
     });
