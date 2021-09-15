@@ -42,6 +42,7 @@ export const ProductsCommandsController = {
     const productExists: string | undefined = await conn('products')
       .select('id')
       .where('id', product_id)
+      .where('deleted_at', null)
       .first();
 
     if (!productExists) return res.status(404).json({ error: Errors.NOT_FOUND });
@@ -76,6 +77,7 @@ export const ProductsCommandsController = {
       conn('products_commands')
         .select('*')
         .where('id', command_id)
+        .where('product_id', product_id)
         .where('deleted_at', null)
         .first(),
       conn('products').select('*').where('id', product_id).where('deleted_at', null).first(),
@@ -112,11 +114,19 @@ export const ProductsCommandsController = {
       return res.status(401).json({ error: Errors.NO_PERMISSION });
 
     // Verificar se o ID é válido
-    const { command_id } = req.params;
+    const { product_id, command_id } = req.params;
 
-    const dataExist = await conn('products_commands').select('*').where('id', command_id).first();
+    const [commandExists, productExists] = await Promise.all([
+      conn('products_commands')
+        .select('*')
+        .where('id', command_id)
+        .where('product_id', product_id)
+        .where('deleted_at', null)
+        .first(),
+      conn('products').select('*').where('id', product_id).where('deleted_at', null).first(),
+    ]);
 
-    if (!dataExist) return res.status(404).json({ error: Errors.NOT_FOUND });
+    if (!commandExists || !productExists) return res.status(404).json({ error: Errors.NOT_FOUND });
 
     // Remover dados
     const deletedField = 'deleted_' + Date.now().toString();
