@@ -77,6 +77,7 @@ export const ProductsBenefitsController = {
       conn('products_benefits')
         .select('*')
         .where('id', benefit_id)
+        .where('product_id', product_id)
         .where('deleted_at', null)
         .first(),
       conn('products').select('*').where('id', product_id).where('deleted_at', null).first(),
@@ -113,15 +114,19 @@ export const ProductsBenefitsController = {
       return res.status(401).json({ error: Errors.NO_PERMISSION });
 
     // Verificar se o ID existe
-    const { benefit_id } = req.params;
+    const { product_id, benefit_id } = req.params;
 
-    const benefitExists = await conn('products_benefits')
-      .select('*')
-      .where('id', benefit_id)
-      .where('deleted_at', null)
-      .first();
+    const [benefitExists, productExists] = await Promise.all([
+      conn('products_benefits')
+        .select('*')
+        .where('id', benefit_id)
+        .where('product_id', product_id)
+        .where('deleted_at', null)
+        .first(),
+      conn('products').select('*').where('id', product_id).where('deleted_at', null).first(),
+    ]);
 
-    if (!benefitExists) return res.status(404).json({ error: Errors.NOT_FOUND });
+    if (!benefitExists || !productExists) return res.status(404).json({ error: Errors.NOT_FOUND });
 
     // Remover dados
     const deletedField = 'deleted_' + Date.now().toString();

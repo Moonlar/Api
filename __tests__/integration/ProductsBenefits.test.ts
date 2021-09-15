@@ -27,7 +27,7 @@ describe('Product Benefits Routes', () => {
     await managerAgent.get('/test/token/manager');
   });
 
-  describe('POST /:product_id/benefit', () => {
+  describe('POST /product/:product_id/benefit', () => {
     it('Precisa estar conectado', async () => {
       const response = await request.post(`/product/${productsData[2].id}/benefit/`);
 
@@ -140,7 +140,7 @@ describe('Product Benefits Routes', () => {
     });
   });
 
-  describe('PATCH /:product_id/benefit/:benefit_id', () => {
+  describe('PATCH /product/:product_id/benefit/:benefit_id', () => {
     it('Precisa estar conectado', async () => {
       const response = await request.patch(`/product/${productsData[2].id}/benefit/${benefitID}`);
 
@@ -255,6 +255,94 @@ describe('Product Benefits Routes', () => {
       expect(createdBenefit).toHaveProperty('description', 'Updated benefit 4');
 
       benefitID = createdBenefit.id;
+    });
+  });
+
+  describe('DELETE /product/:product_id/benefit/:benefit_id', () => {
+    it('Precisa estar conectado', async () => {
+      const response = await request.delete(`/product/${productsData[2].id}/benefit/${benefitID}`);
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NEED_AUTHENTICATE);
+    });
+
+    it('(User) Precisa permissão', async () => {
+      const response = await userAgent.delete(
+        `/product/${productsData[2].id}/benefit/${benefitID}`
+      );
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NO_PERMISSION);
+    });
+
+    it('(Admin) Precisa permissão', async () => {
+      const response = await adminAgent.delete(
+        `/product/${productsData[2].id}/benefit/${benefitID}`
+      );
+
+      expect(response.statusCode).toBe(401);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NO_PERMISSION);
+    });
+
+    it('(Manager) Produto não encontrado (deleted product)', async () => {
+      const response = await managerAgent.delete(
+        `/product/${productsData[0].id}/benefit/${benefitID}`
+      );
+
+      expect(response.statusCode).toBe(404);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NOT_FOUND);
+    });
+
+    it('(Manager) Produto não encontrado (invalid product)', async () => {
+      const response = await managerAgent.delete(`/product/invalid/benefit/${benefitID}`);
+
+      expect(response.statusCode).toBe(404);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NOT_FOUND);
+    });
+
+    it('(Manager) Benefício não encontrado (invalid benefit)', async () => {
+      const response = await managerAgent.delete(`/product/${productsData[2].id}/benefit/invalid`);
+
+      expect(response.statusCode).toBe(404);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('error', Errors.NOT_FOUND);
+    });
+
+    it('(Manager) Remover dados', async () => {
+      const response = await managerAgent.delete(
+        `/product/${productsData[2].id}/benefit/${benefitID}`
+      );
+
+      expect(response.statusCode).toBe(200);
+      expect(response.headers).toBeTruthy();
+      expect(response.headers['content-type']).toMatch(/json/);
+      expect(response.body).toBeTruthy();
+      expect(response.body).toHaveProperty('message', Success.DELETED);
+
+      const wasDeleted = await conn('products_benefits')
+        .select('id')
+        .where('id', productsData[2].id)
+        .where('deleted_at', null)
+        .first();
+
+      expect(wasDeleted).toBeFalsy();
     });
   });
 });
