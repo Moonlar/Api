@@ -35,7 +35,7 @@ export const ProductsController = {
   async show(req, res) {
     // Parâmetros de busca
     let page = Number(req.query.page || '1');
-    let search = (req.query.search || '').toString();
+    const search = (req.query.search || '').toString();
     const limit = 10;
 
     const isAdmin = ['admin', 'manager'].includes(req.user?.permission || '');
@@ -55,12 +55,12 @@ export const ProductsController = {
               .where('active', true)
               .where('name', 'like', `%${search}%`)
               .where('deleted_at', null)
-          )[0]['count(`id`)']
+          )[0]['count(`id`)'],
     );
     const pages = Math.ceil(length / limit) || 1;
 
     // Validar página de busca
-    if (isNaN(page) || page <= 0) page = 1;
+    if (Number.isNaN(page) || page <= 0) page = 1;
 
     if (page > pages) page = pages;
 
@@ -182,9 +182,6 @@ export const ProductsController = {
       server_id,
     };
 
-    // Dados formatados
-    let data: CreateProductData;
-
     // Validar dados
     try {
       CreateProductSchema.validateSync(requestData, { abortEarly: false });
@@ -192,7 +189,8 @@ export const ProductsController = {
       return res.status(400).json({ error: Errors.INVALID_REQUEST, errors: err.errors });
     }
 
-    data = CreateProductSchema.cast(requestData) as any;
+    // Dados formatados
+    const data: CreateProductData = CreateProductSchema.cast(requestData) as any;
 
     // Validar id do servidor de relacionamento
     const serverExists: ServerData | undefined = await conn('servers')
@@ -279,7 +277,6 @@ export const ProductsController = {
     if (!productExists) return res.status(404).json({ error: Errors.NOT_FOUND });
 
     // Validar dados
-    let data: UpdateProductData | undefined;
     const bodyData = {
       name,
       description,
@@ -295,7 +292,7 @@ export const ProductsController = {
       return res.status(400).json({ error: Errors.INVALID_REQUEST, errors: err.errors });
     }
 
-    data = UpdateProductSchema.cast(bodyData) as any;
+    const data: UpdateProductData | undefined = UpdateProductSchema.cast(bodyData) as any;
 
     // Atualizar dados
     await conn('products').where('id', id).update(data);
@@ -322,7 +319,7 @@ export const ProductsController = {
     if (!productExist) return res.status(404).json({ error: Errors.NOT_FOUND });
 
     // String que vai substituir dados originais
-    const deletedField = 'deleted_' + Date.now();
+    const deletedField = `deleted_${Date.now()}`;
 
     // Atualizar dados
     const trx = await conn.transaction();

@@ -129,7 +129,7 @@ export const ProductsBenefitsController = {
     if (!benefitExists || !productExists) return res.status(404).json({ error: Errors.NOT_FOUND });
 
     // Remover dados
-    const deletedField = 'deleted_' + Date.now().toString();
+    const deletedField = `deleted_${Date.now().toString()}`;
 
     await conn('products_benefits')
       .update({

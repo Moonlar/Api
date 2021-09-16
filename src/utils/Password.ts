@@ -1,10 +1,7 @@
 import bcrypt from 'bcrypt';
 
 const saltRounds = process.env.SALT_ROUNDS || 10;
-const CHARS =
-  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&*()_'.split(
-    ''
-  );
+const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&*()_'.split('');
 
 function randomNumber(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min)) + min;

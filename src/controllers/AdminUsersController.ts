@@ -3,10 +3,7 @@ import { v4 as uuid } from 'uuid';
 import conn from '../database/Connection';
 import Password from '../utils/Password';
 import { Errors, Success } from '../utils/Response';
-import {
-  CreateAdminUserSchema,
-  UpdateAdminUserSchema,
-} from '../utils/Validators';
+import { CreateAdminUserSchema, UpdateAdminUserSchema } from '../utils/Validators';
 
 import { AdminUserData, Controller } from '../typings';
 
@@ -32,7 +29,7 @@ export const AdminUsersController = {
 
     // Parâmetros de busca
     let page = Number(req.query.page || '1');
-    let search = (req.query.search || '').toString();
+    const search = (req.query.search || '').toString();
     const limit = 10;
 
     // Informações
@@ -42,12 +39,12 @@ export const AdminUsersController = {
           .count('id')
           .where('identifier', 'like', `%${search}%`)
           .where('deleted_at', null)
-      )[0]['count(`id`)']
+      )[0]['count(`id`)'],
     );
     const pages = Math.ceil(length / limit) || 1;
 
     // Validar página de busca
-    if (isNaN(page) || page <= 0) page = 1;
+    if (Number.isNaN(page) || page <= 0) page = 1;
 
     if (page > pages) page = pages;
 
@@ -90,7 +87,7 @@ export const AdminUsersController = {
     // Buscar dados
     const user: AdminUserData = await conn('admin_users')
       .select('*')
-      .where('identifier', identifier ? identifier : req.user!.nickname)
+      .where('identifier', identifier || req.user!.nickname)
       .where('deleted_at', null)
       .first();
 
@@ -120,36 +117,28 @@ export const AdminUsersController = {
 
     // Fazer validação
     try {
-      CreateAdminUserSchema.validateSync(
-        { nickname, email },
-        { abortEarly: false }
-      );
+      CreateAdminUserSchema.validateSync({ nickname, email }, { abortEarly: false });
     } catch (err: any) {
-      return res
-        .status(400)
-        .json({ error: Errors.INVALID_REQUEST, errors: err.errors });
+      return res.status(400).json({ error: Errors.INVALID_REQUEST, errors: err.errors });
     }
 
     nickname = nickname!;
     email = email!;
 
     // Verificar se já existe um usuário com mesmo nickname/email
-    const userAlreadyExist: AdminUserData | undefined = await conn(
-      'admin_users'
-    )
+    const userAlreadyExist: AdminUserData | undefined = await conn('admin_users')
       .select('id')
       .where('identifier', nickname.toLowerCase())
       .orWhere('email', email.toLowerCase())
       .first();
 
-    if (userAlreadyExist)
-      return res.status(401).json({ error: Errors.INVALID_REQUEST });
+    if (userAlreadyExist) return res.status(401).json({ error: Errors.INVALID_REQUEST });
 
     // Criar novo usuário
     const newUser = {
       id: uuid(),
       identifier: nickname.toLowerCase(),
-      nickname: nickname,
+      nickname,
       email: email.toLowerCase(),
       password: Password.hash(Password.random()),
       permission: 'admin',
@@ -188,32 +177,24 @@ export const AdminUsersController = {
 
     // Validar dados
     try {
-      UpdateAdminUserSchema.validateSync(
-        { nickname, email, permission },
-        { abortEarly: false }
-      );
+      UpdateAdminUserSchema.validateSync({ nickname, email, permission }, { abortEarly: false });
     } catch (err: any) {
-      return res
-        .status(400)
-        .json({ error: Errors.INVALID_REQUEST, errors: err.errors });
+      return res.status(400).json({ error: Errors.INVALID_REQUEST, errors: err.errors });
     }
 
     // Verificar disponibilidade do nickname
-    const userAlreadyExist: AdminUserData | undefined = await conn(
-      'admin_users'
-    )
+    const userAlreadyExist: AdminUserData | undefined = await conn('admin_users')
       .select('id')
       .where('identifier', (nickname || '').toLowerCase())
       .orWhere('email', (email || '').toLowerCase())
       .first();
 
-    if (userAlreadyExist)
-      return res.status(400).json({ error: Errors.INVALID_REQUEST });
+    if (userAlreadyExist) return res.status(400).json({ error: Errors.INVALID_REQUEST });
 
     // Novos dados para atualizar
     const newData = {
       identifier: nickname ? nickname.toLowerCase() : undefined,
-      nickname: nickname,
+      nickname,
       permission,
       email,
       updated_at: conn.fn.now() as any,

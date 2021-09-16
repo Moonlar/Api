@@ -1,6 +1,7 @@
+/* eslint-disable no-unused-vars */
 import { Request, Response } from 'express';
 
-interface Controller {
+export interface Controller {
   /**
    * Retornar dados específicos
    */
@@ -23,7 +24,7 @@ interface Controller {
   delete: (req: Request, res: Response) => Promise<any>;
 }
 
-interface AdminUserData {
+export interface AdminUserData {
   id: string;
   identifier: string;
   nickname: string;
@@ -35,7 +36,7 @@ interface AdminUserData {
   deleted_at: string | null;
 }
 
-interface ProductData {
+export interface ProductData {
   id: string;
   name: string;
   description: string;
@@ -48,7 +49,7 @@ interface ProductData {
   deleted_at: string | null;
 }
 
-interface BenefitData {
+export interface BenefitData {
   id: string;
   product_id: string;
   name: string;
@@ -58,7 +59,7 @@ interface BenefitData {
   deleted_at: string | null;
 }
 
-interface CommandData {
+export interface CommandData {
   id: string;
   product_id: string;
   name: string;
@@ -69,7 +70,7 @@ interface CommandData {
   deleted_at: string | null;
 }
 
-interface CouponData {
+export interface CouponData {
   id: string;
   code: string;
   name: string;
@@ -82,7 +83,7 @@ interface CouponData {
   deleted_at: string | null;
 }
 
-interface PurchaseData {
+export interface PurchaseData {
   id: string;
   status: 'pending' | 'completed' | 'cancelled' | 'activated';
   nickname: string;
@@ -95,7 +96,7 @@ interface PurchaseData {
   deleted_at: string | null;
 }
 
-interface PurchaseItemData {
+export interface PurchaseItemData {
   id: string;
   purchase_id: string;
   product_id: string;
@@ -104,7 +105,7 @@ interface PurchaseItemData {
   deleted_at: string | null;
 }
 
-interface ServerData {
+export interface ServerData {
   id: string;
   identifier: string;
   name: string;
@@ -114,7 +115,7 @@ interface ServerData {
   deleted_at: string | null;
 }
 
-interface TokenData {
+export interface TokenData {
   nickname: string;
   permission: 'user' | AdminUserData['permission'];
 }

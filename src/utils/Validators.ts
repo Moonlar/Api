@@ -49,7 +49,7 @@ export const CreateProductSchema = yup.object().shape({
       yup.object().shape({
         name: yup.string().trim().required().min(4).max(30),
         description: yup.string().trim().required().min(4).max(60),
-      })
+      }),
     )
     .required(),
   commands: yup
@@ -58,7 +58,7 @@ export const CreateProductSchema = yup.object().shape({
       yup.object().shape({
         name: yup.string().trim().required().min(4).max(30),
         command: yup.string().trim().required().min(4).max(60),
-      })
+      }),
     )
     .required(),
 });

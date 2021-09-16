@@ -6,11 +6,7 @@ export async function up(knex: Knex): Promise<void> {
     table.string('name').notNullable();
     table.string('description').notNullable();
     table.string('image_url');
-    table
-      .string('server_id')
-      .references('id')
-      .inTable('servers')
-      .onDelete('CASCADE');
+    table.string('server_id').references('id').inTable('servers').onDelete('CASCADE');
     table.float('price').notNullable();
     table.boolean('active').defaultTo(false);
     table.timestamp('created_at').defaultTo(knex.fn.now());

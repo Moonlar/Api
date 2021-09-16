@@ -29,24 +29,20 @@ export const AdminAuthController = {
 
   async create(req, res) {
     // Retornar erro se já estiver conectado
-    if (req.isAuth)
+    if (req.isAuth) {
       return res.status(401).json({
         error: Errors.NEED_LOGOUT,
       });
+    }
 
     // Dados de login
-    let { email, password } = req.body as CreateAuthData;
+    const { email, password } = req.body as CreateAuthData;
 
     // Validar dados
     try {
-      AdminUserLogInSchema.validateSync(
-        { email, password },
-        { abortEarly: false }
-      );
+      AdminUserLogInSchema.validateSync({ email, password }, { abortEarly: false });
     } catch (err: any) {
-      return res
-        .status(400)
-        .json({ error: Errors.INVALID_REQUEST, errors: err.errors });
+      return res.status(400).json({ error: Errors.INVALID_REQUEST, errors: err.errors });
     }
 
     // Formatar dados

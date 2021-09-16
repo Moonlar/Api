@@ -7,10 +7,7 @@ import Password from '../../utils/Password';
 export async function seed(knex: Knex): Promise<void> {
   // Verificar se o usuário padrão já foi criado
   /* TO-DO: Alterar modo de verificação para count */
-  const userExist = await knex('admin_users')
-    .select('*')
-    .where('identifier', 'default')
-    .first();
+  const userExist = await knex('admin_users').select('*').where('identifier', 'default').first();
 
   if (userExist) return;
 

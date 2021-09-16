@@ -20,7 +20,7 @@ export const ServersController = {
   async show(req, res) {
     // Parâmetros de busca
     let page = Number(req.query.page || '1');
-    let search = (req.query.search || '').toString();
+    const search = (req.query.search || '').toString();
     const limit = 10;
 
     // Informações
@@ -30,12 +30,12 @@ export const ServersController = {
           .count('id')
           .where('deleted_at', null)
           .where('name', 'like', `%${search}%`)
-      )[0]['count(`id`)']
+      )[0]['count(`id`)'],
     );
     const pages = Math.ceil(length / limit) || 1;
 
     // Validar página de busca
-    if (isNaN(page) || page <= 0) page = 1;
+    if (Number.isNaN(page) || page <= 0) page = 1;
 
     if (page > pages) page = pages;
 
@@ -95,9 +95,7 @@ export const ServersController = {
 
       data = CreateServerSchema.cast(bodyData) as any;
     } catch (err: any) {
-      return res
-        .status(400)
-        .json({ error: Errors.INVALID_REQUEST, errors: err.errors });
+      return res.status(400).json({ error: Errors.INVALID_REQUEST, errors: err.errors });
     }
 
     // Caso o cast falhe
@@ -109,8 +107,7 @@ export const ServersController = {
       .where('identifier', data.name.toLowerCase())
       .first();
 
-    if (serverExists)
-      return res.status(400).json({ error: Errors.INVALID_REQUEST });
+    if (serverExists) return res.status(400).json({ error: Errors.INVALID_REQUEST });
 
     // Dados para inserir no banco de dados
     data = {
@@ -135,8 +132,7 @@ export const ServersController = {
     const { name, description } = req.body as UpdateServerData;
 
     // Se não for fornecido dados para atualizar
-    if (!name && !description)
-      return res.status(400).json({ error: Errors.INVALID_REQUEST });
+    if (!name && !description) return res.status(400).json({ error: Errors.INVALID_REQUEST });
 
     const { id } = req.params as { id: string };
 
@@ -153,16 +149,11 @@ export const ServersController = {
     let data: UpdateServerData | undefined;
 
     try {
-      UpdateServerSchema.validateSync(
-        { name, description },
-        { abortEarly: false }
-      );
+      UpdateServerSchema.validateSync({ name, description }, { abortEarly: false });
 
       data = UpdateServerSchema.cast({ name, description }) as any;
     } catch (err: any) {
-      return res
-        .status(400)
-        .json({ error: Errors.INVALID_REQUEST, errors: err.errors });
+      return res.status(400).json({ error: Errors.INVALID_REQUEST, errors: err.errors });
     }
 
     // Caso o cast falhe
@@ -175,8 +166,7 @@ export const ServersController = {
         .where('identifier', data.name.toLowerCase())
         .first();
 
-      if (nameInUse)
-        return res.status(400).json({ error: Errors.INVALID_REQUEST });
+      if (nameInUse) return res.status(400).json({ error: Errors.INVALID_REQUEST });
     }
 
     // Atualizar dados
@@ -209,8 +199,8 @@ export const ServersController = {
     // Atualizar informações
     await conn('servers')
       .update({
-        name: 'deleted_' + Date.now().toString(),
-        description: 'deleted_' + Date.now().toString(),
+        name: `deleted_${Date.now().toString()}`,
+        description: `deleted_${Date.now().toString()}`,
         updated_at: conn.fn.now(),
         deleted_at: conn.fn.now(),
       })
