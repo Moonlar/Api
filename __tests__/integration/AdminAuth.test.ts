@@ -1,10 +1,10 @@
-import supertest from 'supertest';
 import { matchers } from 'jest-json-schema';
+import supertest from 'supertest';
 
 import app from '../../src/App';
 import { runMigrations, runSeeds } from '../../src/database/Connection';
-import { createDefaultUsers } from '../utils/data';
 import { Errors, Success } from '../../src/utils/Response';
+import { createDefaultUsers } from '../utils/data';
 
 expect.extend(matchers);
 
@@ -114,9 +114,7 @@ describe('Admin Auth Routes', () => {
     });
 
     it('Deve retornar dados inválidos (sem email)', async () => {
-      const response = await request
-        .post('/admin/auth')
-        .send({ password: '12345678' });
+      const response = await request.post('/admin/auth').send({ password: '12345678' });
 
       expect(response.statusCode).toBe(400);
       expect(response.headers).toBeTruthy();
@@ -142,9 +140,7 @@ describe('Admin Auth Routes', () => {
     });
 
     it('Deve retornar dados inválidos (sem password)', async () => {
-      const response = await request
-        .post('/admin/auth')
-        .send({ email: 'default@gmail.com' });
+      const response = await request.post('/admin/auth').send({ email: 'default@gmail.com' });
 
       expect(response.statusCode).toBe(400);
       expect(response.headers).toBeTruthy();

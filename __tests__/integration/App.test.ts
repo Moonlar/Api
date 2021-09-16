@@ -1,18 +1,18 @@
-import supertest from 'supertest';
 import { matchers } from 'jest-json-schema';
+import supertest from 'supertest';
 
 import app from '../../src/App';
-import { runMigrations, runSeeds } from '../../src/database/Connection';
-import { createDefaultUsers } from '../utils/data';
+// import { runMigrations, runSeeds } from '../../src/database/Connection';
+// import { createDefaultUsers } from '../utils/data';
 
 expect.extend(matchers);
 
 const request = supertest(app);
 
 describe('App Routes', () => {
-  const userAgent = supertest.agent(app);
-  const adminAgent = supertest.agent(app);
-  const managerAgent = supertest.agent(app);
+  // const userAgent = supertest.agent(app);
+  // const adminAgent = supertest.agent(app);
+  // const managerAgent = supertest.agent(app);
 
   beforeAll(async () => {
     // await runMigrations();

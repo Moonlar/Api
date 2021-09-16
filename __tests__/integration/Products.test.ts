@@ -1,5 +1,5 @@
-import supertest from 'supertest';
 import { matchers } from 'jest-json-schema';
+import supertest from 'supertest';
 
 import app from '../../src/App';
 import conn, { runMigrations, runSeeds } from '../../src/database/Connection';
@@ -503,7 +503,7 @@ describe('Products Routes', () => {
     it('(Manager) Criar produto', async () => {
       const response = await managerAgent
         .post('/product')
-        .send({ ...newTestProduct, name: newTestProduct.name + ' - 1' });
+        .send({ ...newTestProduct, name: `${newTestProduct.name} - 1` });
 
       expect(response.statusCode).toBe(201);
       expect(response.headers).toBeTruthy();
@@ -513,7 +513,7 @@ describe('Products Routes', () => {
 
       const { id: productID }: { id: string | undefined } = await conn('products')
         .select('id')
-        .where('name', newTestProduct.name + ' - 1')
+        .where('name', `${newTestProduct.name} - 1`)
         .first();
 
       expect(productID).toBeTruthy();
@@ -531,7 +531,7 @@ describe('Products Routes', () => {
     it('(Manager) Criar produto (sem benefits e commands)', async () => {
       const response = await managerAgent.post('/product').send({
         ...newTestProduct,
-        name: newTestProduct.name + ' - 2',
+        name: `${newTestProduct.name} - 2`,
         benefits: [],
         commands: [],
       });
@@ -544,7 +544,7 @@ describe('Products Routes', () => {
 
       const { id: productID }: { id: string | undefined } = await conn('products')
         .select('id')
-        .where('name', newTestProduct.name + ' - 2')
+        .where('name', `${newTestProduct.name} - 2`)
         .first();
 
       expect(productID).toBeTruthy();

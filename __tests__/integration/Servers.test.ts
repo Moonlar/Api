@@ -1,15 +1,11 @@
-import supertest from 'supertest';
 import { matchers } from 'jest-json-schema';
+import supertest from 'supertest';
 
 import app from '../../src/App';
 import conn, { runMigrations, runSeeds } from '../../src/database/Connection';
-import { serverSchema } from '../utils/schemas';
 import { Errors, Success } from '../../src/utils/Response';
-import {
-  createDefaultServers,
-  createDefaultUsers,
-  serversData,
-} from '../utils/data';
+import { createDefaultServers, createDefaultUsers, serversData } from '../utils/data';
+import { serverSchema } from '../utils/schemas';
 
 expect.extend(matchers);
 
@@ -287,9 +283,7 @@ describe('Server Routes', () => {
     });
 
     it('(Manager) Deve retornar que dados são inválidos (Sem description)', async () => {
-      const response = await managerAgent
-        .post('/server')
-        .send({ name: 'Valid name' });
+      const response = await managerAgent.post('/server').send({ name: 'Valid name' });
 
       expect(response.statusCode).toBe(400);
       expect(response.headers).toBeTruthy();
@@ -323,10 +317,7 @@ describe('Server Routes', () => {
       expect(response.body).toBeTruthy();
       expect(response.body).toHaveProperty('message', Success.CREATED);
 
-      const isCreated = await conn('servers')
-        .select('*')
-        .where('identifier', 'new server')
-        .first();
+      const isCreated = await conn('servers').select('*').where('identifier', 'new server').first();
 
       expect(isCreated).toBeTruthy();
     });
@@ -374,9 +365,7 @@ describe('Server Routes', () => {
     });
 
     it('(Manager) Deve retornar que dados são inválidos (name inválido)', async () => {
-      const response = await managerAgent
-        .patch(`/server/${serversData[1].id}`)
-        .send({ name: 'a' });
+      const response = await managerAgent.patch(`/server/${serversData[1].id}`).send({ name: 'a' });
 
       expect(response.statusCode).toBe(400);
       expect(response.headers).toBeTruthy();
@@ -432,10 +421,7 @@ describe('Server Routes', () => {
       expect(response.body).toBeTruthy();
       expect(response.body).toHaveProperty('message', Success.UPDATED);
 
-      const isUpdated = await conn('servers')
-        .select('*')
-        .where('identifier', 'updated')
-        .first();
+      const isUpdated = await conn('servers').select('*').where('identifier', 'updated').first();
 
       expect(isUpdated).toBeTruthy();
     });
@@ -473,9 +459,7 @@ describe('Server Routes', () => {
     });
 
     it('(Manager) Deve retornar que servidor não foi encontrado', async () => {
-      const response = await managerAgent.delete(
-        `/server/${serversData[0].id}`
-      );
+      const response = await managerAgent.delete(`/server/${serversData[0].id}`);
 
       expect(response.statusCode).toBe(404);
       expect(response.headers).toBeTruthy();
@@ -485,9 +469,7 @@ describe('Server Routes', () => {
     });
 
     it('(Manager) Deve remover servidor', async () => {
-      const response = await managerAgent.delete(
-        `/server/${serversData[1].id}`
-      );
+      const response = await managerAgent.delete(`/server/${serversData[1].id}`);
 
       expect(response.statusCode).toBe(200);
       expect(response.headers).toBeTruthy();

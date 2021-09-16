@@ -31,14 +31,7 @@ export const userSchema = {
       require: true,
     },
   },
-  required: [
-    'id',
-    'identifier',
-    'nickname',
-    'permission',
-    'created_at',
-    'updated_at',
-  ],
+  required: ['id', 'identifier', 'nickname', 'permission', 'created_at', 'updated_at'],
 };
 
 export const serverSchema = {
@@ -70,14 +63,7 @@ export const serverSchema = {
       require: true,
     },
   },
-  required: [
-    'id',
-    'identifier',
-    'name',
-    'description',
-    'created_at',
-    'updated_at',
-  ],
+  required: ['id', 'identifier', 'name', 'description', 'created_at', 'updated_at'],
 };
 
 export const productSchema = {
@@ -117,15 +103,7 @@ export const productSchema = {
       require: true,
     },
   },
-  required: [
-    'id',
-    'name',
-    'description',
-    'image_url',
-    'price',
-    'created_at',
-    'updated_at',
-  ],
+  required: ['id', 'name', 'description', 'image_url', 'price', 'created_at', 'updated_at'],
 };
 
 export const productServerSchema = {

@@ -1,10 +1,10 @@
-import supertest from 'supertest';
 import { matchers } from 'jest-json-schema';
+import supertest from 'supertest';
 
 import app from '../../src/App';
 import conn, { runMigrations, runSeeds } from '../../src/database/Connection';
-import { createDefaultUsers } from '../utils/data';
 import { Errors, Success } from '../../src/utils/Response';
+import { createDefaultUsers } from '../utils/data';
 import { userSchema } from '../utils/schemas';
 
 expect.extend(matchers);
@@ -77,9 +77,7 @@ describe('Admin Users Routes', () => {
     });
 
     it('Deve retornar dados válidos com parâmetros de busca', async () => {
-      const response = await managerAgent
-        .get('/admin/users')
-        .query({ search: 'Man' });
+      const response = await managerAgent.get('/admin/users').query({ search: 'Man' });
 
       expect(response.statusCode).toBe(200);
       expect(response.headers).toBeTruthy();
@@ -96,9 +94,7 @@ describe('Admin Users Routes', () => {
     });
 
     it('Deve retornar dados válidos com parâmetros de busca inválidos (Invalid page)', async () => {
-      const response = await managerAgent
-        .get('/admin/users')
-        .query({ page: 1000 });
+      const response = await managerAgent.get('/admin/users').query({ page: 1000 });
 
       expect(response.statusCode).toBe(200);
       expect(response.headers).toBeTruthy();
@@ -118,9 +114,7 @@ describe('Admin Users Routes', () => {
     });
 
     it('Deve retornar dados válidos com parâmetros de busca inválidos (NaN page)', async () => {
-      const response = await managerAgent
-        .get('/admin/users')
-        .query({ page: 'invalid' });
+      const response = await managerAgent.get('/admin/users').query({ page: 'invalid' });
 
       expect(response.statusCode).toBe(200);
       expect(response.headers).toBeTruthy();
@@ -266,9 +260,7 @@ describe('Admin Users Routes', () => {
     });
 
     it('(Manager) Dados inválidos (none nickname)', async () => {
-      const response = await managerAgent
-        .post('/admin/user')
-        .send({ email: 'valid@gmail.com' });
+      const response = await managerAgent.post('/admin/user').send({ email: 'valid@gmail.com' });
 
       expect(response.statusCode).toBe(400);
       expect(response.headers).toBeTruthy();
@@ -278,9 +270,7 @@ describe('Admin Users Routes', () => {
     });
 
     it('(Manager) Dados inválidos (none email)', async () => {
-      const response = await managerAgent
-        .post('/admin/user')
-        .send({ nickname: 'Valid' });
+      const response = await managerAgent.post('/admin/user').send({ nickname: 'Valid' });
 
       expect(response.statusCode).toBe(400);
       expect(response.headers).toBeTruthy();
@@ -336,10 +326,7 @@ describe('Admin Users Routes', () => {
       expect(response.body).toBeTruthy();
       expect(response.body).toHaveProperty('message', Success.CREATED);
 
-      const createdUser = await conn('admin_users')
-        .select('*')
-        .where('identifier', 'new_')
-        .first();
+      const createdUser = await conn('admin_users').select('*').where('identifier', 'new_').first();
 
       expect(createdUser).toBeTruthy();
     });
@@ -399,9 +386,7 @@ describe('Admin Users Routes', () => {
     });
 
     it('(Manager) Dados inválidos (email)', async () => {
-      const response = await managerAgent
-        .patch('/admin/user/new_')
-        .send({ email: ' $invalid@' });
+      const response = await managerAgent.patch('/admin/user/new_').send({ email: ' $invalid@' });
 
       expect(response.statusCode).toBe(400);
       expect(response.headers).toBeTruthy();
@@ -411,9 +396,7 @@ describe('Admin Users Routes', () => {
     });
 
     it('(Manager) Dados inválidos (permission)', async () => {
-      const response = await managerAgent
-        .patch('/admin/user/new_')
-        .send({ permission: ' user' });
+      const response = await managerAgent.patch('/admin/user/new_').send({ permission: ' user' });
 
       expect(response.statusCode).toBe(400);
       expect(response.headers).toBeTruthy();
@@ -423,9 +406,7 @@ describe('Admin Users Routes', () => {
     });
 
     it('(Manager) Dados em uso (nickname)', async () => {
-      const response = await managerAgent
-        .patch('/admin/user/new_')
-        .send({ nickname: 'admin' });
+      const response = await managerAgent.patch('/admin/user/new_').send({ nickname: 'admin' });
 
       expect(response.statusCode).toBe(400);
       expect(response.headers).toBeTruthy();
@@ -457,9 +438,7 @@ describe('Admin Users Routes', () => {
       expect(response.body).toBeTruthy();
       expect(response.body).toHaveProperty('message', Success.UPDATED);
 
-      const updatedUser = await conn('admin_users')
-        .select('*')
-        .where('identifier', 'updated');
+      const updatedUser = await conn('admin_users').select('*').where('identifier', 'updated');
 
       expect(updatedUser).toBeTruthy();
     });

@@ -1,10 +1,10 @@
-import supertest from 'supertest';
 import { matchers } from 'jest-json-schema';
+import supertest from 'supertest';
 
 import app from '../../src/App';
 import conn, { runMigrations, runSeeds } from '../../src/database/Connection';
-import { createDefaultProducts, productsData } from '../utils/data';
 import { Errors, Success } from '../../src/utils/Response';
+import { createDefaultProducts, productsData } from '../utils/data';
 
 expect.extend(matchers);
 
@@ -163,7 +163,7 @@ describe('Product Commands Routes', () => {
 
     it('(Admin) Precisa permissão', async () => {
       const response = await adminAgent.patch(
-        `/product/${productsData[2].id}/command/${commandID}`
+        `/product/${productsData[2].id}/command/${commandID}`,
       );
 
       expect(response.statusCode).toBe(401);
@@ -175,7 +175,7 @@ describe('Product Commands Routes', () => {
 
     it('(Manager) Dados inválidos', async () => {
       const response = await managerAgent.patch(
-        `/product/${productsData[2].id}/command/${commandID}`
+        `/product/${productsData[2].id}/command/${commandID}`,
       );
 
       expect(response.statusCode).toBe(400);
@@ -271,7 +271,7 @@ describe('Product Commands Routes', () => {
 
     it('(User) Precisa permissão', async () => {
       const response = await userAgent.delete(
-        `/product/${productsData[2].id}/command/${commandID}`
+        `/product/${productsData[2].id}/command/${commandID}`,
       );
 
       expect(response.statusCode).toBe(401);
@@ -283,7 +283,7 @@ describe('Product Commands Routes', () => {
 
     it('(Admin) Precisa permissão', async () => {
       const response = await adminAgent.delete(
-        `/product/${productsData[2].id}/command/${commandID}`
+        `/product/${productsData[2].id}/command/${commandID}`,
       );
 
       expect(response.statusCode).toBe(401);
@@ -295,7 +295,7 @@ describe('Product Commands Routes', () => {
 
     it('(Manager) Produto não encontrado (deleted product)', async () => {
       const response = await managerAgent.delete(
-        `/product/${productsData[0].id}/command/${commandID}`
+        `/product/${productsData[0].id}/command/${commandID}`,
       );
 
       expect(response.statusCode).toBe(404);
@@ -327,7 +327,7 @@ describe('Product Commands Routes', () => {
 
     it('(Manager) Remover dados', async () => {
       const response = await managerAgent.delete(
-        `/product/${productsData[2].id}/command/${commandID}`
+        `/product/${productsData[2].id}/command/${commandID}`,
       );
 
       expect(response.statusCode).toBe(200);
