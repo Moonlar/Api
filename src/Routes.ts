@@ -8,9 +8,7 @@ import { ProductsCommandsController } from './controllers/ProductsCommandsContro
 import { ProductsController } from './controllers/ProductsController';
 import { ServersController } from './controllers/ServersController';
 import { TestsController } from './controllers/TestsController';
-
 import { Auth } from './middlewares/Auth';
-
 import { UnavailableRoute } from './utils/UnavailableRoute';
 
 const routes = Router();

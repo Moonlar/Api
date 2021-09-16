@@ -1,11 +1,9 @@
 import conn from '../database/Connection';
-
-import Password from '../utils/Password';
+import { AdminUserData, Controller } from '../typings';
 import { GenerateToken } from '../utils/GenerateToken';
+import Password from '../utils/Password';
 import { Errors, Success } from '../utils/Response';
 import { AdminUserLogInSchema } from '../utils/Validators';
-
-import { AdminUserData, Controller } from '../typings';
 
 interface CreateAuthData {
   email?: string;

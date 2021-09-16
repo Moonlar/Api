@@ -1,8 +1,8 @@
-import express from 'express';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import express from 'express';
 import morgan from 'morgan';
 import path from 'path';
-import cookieParser from 'cookie-parser';
 import 'dotenv/config';
 
 import Routes from './Routes';

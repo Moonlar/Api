@@ -2,10 +2,9 @@ import { v4 as uuid } from 'uuid';
 import { ValidationError } from 'yup';
 
 import conn from '../database/Connection';
+import { Controller } from '../typings';
 import { Errors, Success } from '../utils/Response';
 import { CreateProductBenefitSchema, UpdateProductBenefitSchema } from '../utils/Validators';
-
-import { Controller } from '../typings';
 
 interface BenefitBody {
   name?: string;

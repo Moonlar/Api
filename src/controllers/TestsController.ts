@@ -1,7 +1,6 @@
+import { Controller } from '../typings';
 import { GenerateToken } from '../utils/GenerateToken';
 import { Errors, Success } from '../utils/Response';
-
-import { Controller } from '../typings';
 
 const TOKEN_VALIDITY = 1000 * 60 * 60 * 2;
 

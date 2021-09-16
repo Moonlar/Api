@@ -1,10 +1,9 @@
 import { v4 as uuid } from 'uuid';
 
 import conn from '../database/Connection';
-import { CreateServerSchema, UpdateServerSchema } from '../utils/Validators';
-import { Errors, Success } from '../utils/Response';
-
 import { Controller, ServerData } from '../typings';
+import { Errors, Success } from '../utils/Response';
+import { CreateServerSchema, UpdateServerSchema } from '../utils/Validators';
 
 interface CreateServerData {
   name?: string;

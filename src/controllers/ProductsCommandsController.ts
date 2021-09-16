@@ -2,10 +2,9 @@ import { v4 as uuid } from 'uuid';
 import { ValidationError } from 'yup';
 
 import conn from '../database/Connection';
+import { Controller } from '../typings';
 import { Errors, Success } from '../utils/Response';
 import { CreateProductCommandSchema, UpdateProductCommandSchema } from '../utils/Validators';
-
-import { Controller } from '../typings';
 
 interface CommandBody {
   name?: string;

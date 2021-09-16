@@ -1,10 +1,9 @@
 import { v4 as uuid } from 'uuid';
 
 import conn from '../database/Connection';
-import { CreateProductSchema, UpdateProductSchema } from '../utils/Validators';
-import { Errors, Success } from '../utils/Response';
-
 import { BenefitData, CommandData, Controller, ProductData, ServerData } from '../typings';
+import { Errors, Success } from '../utils/Response';
+import { CreateProductSchema, UpdateProductSchema } from '../utils/Validators';
 
 interface CreateProductData {
   name: string;

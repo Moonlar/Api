@@ -1,11 +1,10 @@
 import { v4 as uuid } from 'uuid';
 
 import conn from '../database/Connection';
+import { AdminUserData, Controller } from '../typings';
 import Password from '../utils/Password';
 import { Errors, Success } from '../utils/Response';
 import { CreateAdminUserSchema, UpdateAdminUserSchema } from '../utils/Validators';
-
-import { AdminUserData, Controller } from '../typings';
 
 interface CreateAdminUserData {
   nickname?: string;
