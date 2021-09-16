@@ -91,3 +91,12 @@ export const UpdateProductCommandSchema = yup.object().shape({
   name: yup.string().trim().min(4).max(30),
   command: yup.string().trim().min(4).max(60),
 });
+
+export const CreateCouponSchema = yup.object().shape({
+  code: yup.string().trim().lowercase().min(4).max(8).required(),
+  name: yup.string().trim().min(4).max(30).required(),
+  description: yup.string().trim().min(4).max(150).required(),
+  discount: yup.number().min(0).max(1).required(),
+  starts_at: yup.date().min(new Date()).required(),
+  ends_at: yup.date().min(new Date()).required(),
+});
