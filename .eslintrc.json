@@ -2,7 +2,16 @@
   "env": {
     "es2021": true,
     "node": true
+    // "mocha": true
   },
+  "overrides": [
+    {
+      "files": ["**/*.test.ts"],
+      "env": {
+        "jest": true
+      }
+    }
+  ],
   "extends": ["airbnb-base", "plugin:prettier/recommended"],
   "parser": "@typescript-eslint/parser",
   "settings": {
@@ -21,6 +30,7 @@
     "camelcase": "off",
     "no-unused-vars": "off",
     "no-shadow": "off",
+    "consistent-return": "off",
     "@typescript-eslint/no-unused-vars": "error",
     "@typescript-eslint/no-shadow": ["error"],
     "import/prefer-default-export": "off",
