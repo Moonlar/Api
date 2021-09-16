@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid';
 import { ValidationError } from 'yup';
 
 import conn from '../database/Connection';
-import { Controller } from '../typings';
+import { Controller, CouponData } from '../typings';
 import { Errors, Success } from '../utils/Response';
 import { CreateCouponSchema } from '../utils/Validators';
 
@@ -16,6 +16,52 @@ interface CreateCouponData {
 }
 
 export const CouponsController = {
+  async show(req, res) {
+    // Se não estiver conectado
+    if (!req.isAuth) return res.authError();
+
+    // Verificar permissão
+    if (!['admin', 'manager'].includes(req.user!.permission))
+      return res.status(401).json({ error: Errors.NO_PERMISSION });
+
+    // Parâmetros de busca
+    let page = Number(req.query.page || '1');
+    const search = (req.query.search || '').toString();
+    const limit = 10;
+
+    // Informações
+    const length = Number(
+      (
+        await conn('coupons')
+          .count('id')
+          .where('name', 'like', `%${search}%`)
+          .where('deleted_at', null)
+      )[0]['count(`id`)'],
+    );
+    const pages = Math.ceil(length / limit) || 1;
+
+    // Validar página de busca
+    if (Number.isNaN(page) || page <= 0) page = 1;
+
+    if (page > pages) page = pages;
+
+    // Buscar dados
+    const coupons: CouponData[] = await conn('coupons')
+      .select('*')
+      .where('name', 'like', `%${search}%`)
+      .where('deleted_at', null)
+      .offset((page - 1) * limit)
+      .limit(limit);
+
+    return res.json({
+      page,
+      total_pages: pages,
+      total_coupons: length,
+      limit,
+      coupons,
+    });
+  },
+
   async create(req, res) {
     // Se não estiver conectado
     if (!req.isAuth) return res.authError();

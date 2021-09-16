@@ -64,7 +64,7 @@ routes.patch('/product/:product_id/command/:command_id', ProductsCommandsControl
 routes.delete('/product/:product_id/command/:command_id', ProductsCommandsController.delete);
 
 /* Coupons Routes */
-routes.get('/coupons', UnavailableRoute);
+routes.get('/coupons', CouponsController.show);
 routes.get('/coupon/:code', UnavailableRoute);
 routes.post('/coupon', CouponsController.create);
 routes.patch('/coupon/:id', UnavailableRoute);
