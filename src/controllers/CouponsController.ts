@@ -60,6 +60,8 @@ export const CouponsController = {
     await conn('coupons').insert({
       ...data,
       id: uuid(),
+      starts_at: data.starts_at.toISOString(),
+      ends_at: data.ends_at.toISOString(),
     });
 
     return res.status(201).json({ message: Success.CREATED });
