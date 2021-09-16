@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { AdminAuthController } from './controllers/AdminAuthController';
 import { AdminUsersController } from './controllers/AdminUsersController';
 import { AppController } from './controllers/AppController';
+import { CouponsController } from './controllers/CouponsController';
 import { ProductsBenefitsController } from './controllers/ProductBenefitsController';
 import { ProductsCommandsController } from './controllers/ProductsCommandsController';
 import { ProductsController } from './controllers/ProductsController';
@@ -65,7 +66,7 @@ routes.delete('/product/:product_id/command/:command_id', ProductsCommandsContro
 /* Coupons Routes */
 routes.get('/coupons', UnavailableRoute);
 routes.get('/coupon/:code', UnavailableRoute);
-routes.post('/coupon', UnavailableRoute);
+routes.post('/coupon', CouponsController.create);
 routes.patch('/coupon/:id', UnavailableRoute);
 routes.delete('/coupon/:id', UnavailableRoute);
 
