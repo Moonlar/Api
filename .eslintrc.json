@@ -16,7 +16,7 @@
     "ecmaVersion": 2020,
     "sourceType": "module"
   },
-  "plugins": ["@typescript-eslint"],
+  "plugins": ["@typescript-eslint", "eslint-plugin-import-helpers"],
   "rules": {
     "camelcase": "off",
     "no-unused-vars": "off",
@@ -30,6 +30,15 @@
       {
         "js": "never",
         "ts": "never"
+      }
+    ],
+    "import-helpers/order-imports": [
+      "error",
+      {
+        // example configuration
+        "newlinesBetween": "always",
+        "groups": ["module", ["parent", "sibling", "index"]],
+        "alphabetize": { "order": "asc", "ignoreCase": true }
       }
     ]
   }
