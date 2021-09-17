@@ -154,13 +154,13 @@ export const CouponsController = {
     // Verificar se o cupom existe
     const { code: identifier } = req.params;
 
-    const couponExist: { id: string } | undefined = await conn('coupons')
+    const couponExists: { id: string } | undefined = await conn('coupons')
       .select('id')
       .where('code', identifier)
       .where('deleted_at', null)
       .first();
 
-    if (!couponExist) return res.status(404).json({ error: Errors.NOT_FOUND });
+    if (!couponExists) return res.status(404).json({ error: Errors.NOT_FOUND });
 
     // Verificar dados
     const { code, description, discount, ends_at, name, starts_at } = req.body as UpdateCouponData;
@@ -183,8 +183,37 @@ export const CouponsController = {
     }
 
     // Atualizar dados
-    await conn.update(bodyData).where('id', couponExist.id).where('deleted_at', null);
+    await conn.update(bodyData).where('id', couponExists.id).where('deleted_at', null);
 
     return res.json({ message: Success.UPDATED });
+  },
+
+  async delete(req, res) {
+    // Se não estiver conectado
+    if (!req.isAuth) return res.authError();
+
+    // Verificar permissão
+    if (req.user?.permission !== 'manager')
+      return res.status(401).json({ error: Errors.NO_PERMISSION });
+
+    // Verificar se o cupom existe
+    const { code: identifier } = req.params;
+
+    const couponExists: { id: string } | undefined = await conn('coupons')
+      .select('id')
+      .where('code', identifier)
+      .where('deleted_at', null)
+      .first();
+
+    if (!couponExists) return res.status(404).json({ error: Errors.NOT_FOUND });
+
+    // Remover dados
+    const deletedField = `deleted_${Date.now()}`;
+
+    await conn('coupons')
+      .update({ name: deletedField, description: deletedField, deleted_at: conn.fn.now() })
+      .where('id', couponExists.id);
+
+    return res.json({ message: Success.DELETED });
   },
 } as Controller;

@@ -67,8 +67,8 @@ routes.delete('/product/:product_id/command/:command_id', ProductsCommandsContro
 routes.get('/coupons', CouponsController.show);
 routes.get('/coupon/:code', CouponsController.index);
 routes.post('/coupon', CouponsController.create);
-routes.patch('/coupon/:id', UnavailableRoute);
-routes.delete('/coupon/:id', UnavailableRoute);
+routes.patch('/coupon/:id', CouponsController.update);
+routes.delete('/coupon/:id', CouponsController.delete);
 
 /* Purchases Routes */
 routes.get('/purchases/:nickname', UnavailableRoute);
