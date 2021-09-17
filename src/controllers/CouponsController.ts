@@ -4,7 +4,7 @@ import { ValidationError } from 'yup';
 import conn from '../database/Connection';
 import { Controller, CouponData } from '../typings';
 import { Errors, Success } from '../utils/Response';
-import { CreateCouponSchema } from '../utils/Validators';
+import { CreateCouponSchema, UpdateCouponSchema } from '../utils/Validators';
 
 interface CreateCouponData {
   code: string;
@@ -13,6 +13,15 @@ interface CreateCouponData {
   discount: number;
   starts_at: Date;
   ends_at: Date;
+}
+
+interface UpdateCouponData {
+  code?: string;
+  name?: string;
+  description?: string;
+  discount?: number;
+  starts_at?: Date;
+  ends_at?: Date;
 }
 
 export const CouponsController = {
@@ -66,7 +75,7 @@ export const CouponsController = {
     // Se não estiver conectado
     if (!req.isAuth) return res.authError();
 
-    // Pegar id da requisição
+    // Pegar código do cupom
     const { code } = req.params;
 
     // Buscar dados
@@ -132,5 +141,50 @@ export const CouponsController = {
     });
 
     return res.status(201).json({ message: Success.CREATED });
+  },
+
+  async update(req, res) {
+    // Se não estiver conectado
+    if (!req.isAuth) return res.authError();
+
+    // Verificar permissão
+    if (req.user?.permission !== 'manager')
+      return res.status(401).json({ error: Errors.NO_PERMISSION });
+
+    // Verificar se o cupom existe
+    const { code: identifier } = req.params;
+
+    const couponExist: { id: string } | undefined = await conn('coupons')
+      .select('id')
+      .where('code', identifier)
+      .where('deleted_at', null)
+      .first();
+
+    if (!couponExist) return res.status(404).json({ error: Errors.NOT_FOUND });
+
+    // Verificar dados
+    const { code, description, discount, ends_at, name, starts_at } = req.body as UpdateCouponData;
+
+    if (!code && !description && !discount && !ends_at && !name && !starts_at)
+      return res.status(400).json({ error: Errors.INVALID_REQUEST });
+
+    // Validar dados
+    const bodyData = { code, description, discount, ends_at, name, starts_at };
+
+    try {
+      UpdateCouponSchema.validateSync(bodyData, { abortEarly: false });
+    } catch (err: any) {
+      if (err instanceof ValidationError)
+        return res.status(400).json({ error: Errors.INVALID_REQUEST });
+
+      console.log(err);
+
+      return res.status(500).json({ error: Errors.INTERNAL_ERROR });
+    }
+
+    // Atualizar dados
+    await conn.update(bodyData).where('id', couponExist.id).where('deleted_at', null);
+
+    return res.json({ message: Success.UPDATED });
   },
 } as Controller;

@@ -100,3 +100,12 @@ export const CreateCouponSchema = yup.object().shape({
   starts_at: yup.date().min(new Date()).required(),
   ends_at: yup.date().min(new Date()).required(),
 });
+
+export const UpdateCouponSchema = yup.object().shape({
+  code: yup.string().trim().lowercase().min(4).max(8),
+  name: yup.string().trim().min(4).max(30),
+  description: yup.string().trim().min(4).max(150),
+  discount: yup.number().min(0).max(1),
+  starts_at: yup.date().min(new Date()),
+  ends_at: yup.date().min(new Date()),
+});
