@@ -62,6 +62,27 @@ export const CouponsController = {
     });
   },
 
+  async index(req, res) {
+    // Se não estiver conectado
+    if (!req.isAuth) return res.authError();
+
+    // Pegar id da requisição
+    const { code } = req.params;
+
+    // Buscar dados
+    const coupon: CouponData | undefined = await conn('coupons')
+      .select('*')
+      .where('code', code)
+      .where('deleted_at', null)
+      .first();
+
+    // Se não for encontrado
+    if (!coupon) return res.status(404).json({ error: Errors.NOT_FOUND });
+
+    // Retornar dados
+    return res.json({ ...coupon, deleted_at: undefined });
+  },
+
   async create(req, res) {
     // Se não estiver conectado
     if (!req.isAuth) return res.authError();
