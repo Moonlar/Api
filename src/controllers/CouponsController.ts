@@ -72,8 +72,10 @@ export const CouponsController = {
   },
 
   async index(req, res) {
-    // Se não estiver conectado
-    if (!req.isAuth) return res.authError();
+    // Verificar se está conectado e é usuário admin
+    let isAdmin = false;
+
+    if (req.isAuth && ['admin', 'manager'].includes(req.user!.permission)) isAdmin = true;
 
     // Pegar código do cupom
     const { code } = req.params;
@@ -104,8 +106,8 @@ export const CouponsController = {
       description: coupon.description,
       discount: coupon.discount,
       active,
-      stats_at: coupon.stats_at,
-      ends_at: coupon.ends_at,
+      stats_at: isAdmin ? coupon.stats_at : undefined,
+      ends_at: isAdmin ? coupon.ends_at : undefined,
       created_at: coupon.created_at,
       updated_at: coupon.updated_at,
       deleted_at: undefined,
