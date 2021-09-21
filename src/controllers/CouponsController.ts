@@ -88,8 +88,28 @@ export const CouponsController = {
     // Se não for encontrado
     if (!coupon) return res.status(404).json({ error: Errors.NOT_FOUND });
 
+    // Verificar se o cupom está ativo
+    let active = false;
+    const now = Date.now();
+
+    // Se o dia inicial for maior que agora e o agora for menor que o dia final
+    if (new Date(coupon.stats_at).getTime() >= now && now < new Date(coupon.ends_at).getTime())
+      active = true;
+
     // Retornar dados
-    return res.json({ ...coupon, deleted_at: undefined });
+    return res.json({
+      id: coupon.id,
+      code: coupon.code,
+      name: coupon.name,
+      description: coupon.description,
+      discount: coupon.discount,
+      active,
+      stats_at: coupon.stats_at,
+      ends_at: coupon.ends_at,
+      created_at: coupon.created_at,
+      updated_at: coupon.updated_at,
+      deleted_at: undefined,
+    });
   },
 
   async create(req, res) {
