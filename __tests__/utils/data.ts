@@ -119,8 +119,8 @@ export const couponsData: { [key: string]: TestCouponData } = {
   inactive: {
     id: uuid(),
     code: 'INA',
-    name: 'Cupom removido',
-    description: 'Cupom que foi removido',
+    name: 'Cupom inativo',
+    description: 'Cupom que já expirou',
     discount: 0.5,
     starts_at: new Date(now - oneDay).toISOString(),
     ends_at: new Date(now).toISOString(),
