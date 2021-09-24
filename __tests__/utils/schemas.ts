@@ -165,3 +165,39 @@ export const productCommandSchema = {
   },
   required: ['id', 'name', 'command'],
 };
+
+export const couponSchema = {
+  $id: 'couponTestSchema',
+  type: 'object',
+  properties: {
+    id: {
+      type: 'string',
+      require: true,
+    },
+    code: {
+      type: 'string',
+      require: true,
+    },
+    name: {
+      type: 'string',
+      require: true,
+    },
+    description: {
+      type: 'string',
+      require: true,
+    },
+    discount: {
+      type: 'number',
+      require: true,
+    },
+    starts_at: {
+      type: 'string',
+      require: true,
+    },
+    ends_at: {
+      type: 'string',
+      require: true,
+    },
+  },
+  required: ['id', 'code', 'name', 'description', 'starts_at', 'ends_at'],
+};
