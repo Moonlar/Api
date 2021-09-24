@@ -3,10 +3,22 @@ import { v4 as uuid } from 'uuid';
 import conn from '../../src/database/Connection';
 import Password from '../../src/utils/Password';
 
+interface TestCouponData {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  discount: number;
+  starts_at: string;
+  ends_at: string;
+  deleted_at?: string;
+}
+
 const alreadyExecuted = {
   users: false,
   servers: false,
   products: false,
+  coupons: false,
 };
 
 const usersData = [
@@ -53,11 +65,6 @@ export const serversData = [
   },
 ];
 
-/**
- * [0] - Deleted
- * [1] - Disabled
- * [2] - Active
- */
 export const productsData = [
   {
     id: uuid(),
@@ -85,6 +92,40 @@ export const productsData = [
     active: true,
   },
 ];
+
+const now = Date.now();
+const oneDay = 1000 * 60 * 60 * 24;
+
+export const couponsData: { [key: string]: TestCouponData } = {
+  deleted: {
+    id: uuid(),
+    code: 'DEL',
+    name: 'Cupom removido',
+    description: 'Cupom que foi removido',
+    discount: 0.5,
+    starts_at: new Date(now).toISOString(),
+    ends_at: new Date(now + oneDay).toISOString(),
+    deleted_at: conn.fn.now() as any,
+  },
+  active: {
+    id: uuid(),
+    code: 'ACT',
+    name: 'Cupom ativo',
+    description: 'Cupom que ainda está ativo',
+    discount: 0.5,
+    starts_at: new Date(now).toISOString(),
+    ends_at: new Date(now + oneDay).toISOString(),
+  },
+  inactive: {
+    id: uuid(),
+    code: 'INA',
+    name: 'Cupom removido',
+    description: 'Cupom que foi removido',
+    discount: 0.5,
+    starts_at: new Date(now - oneDay).toISOString(),
+    ends_at: new Date(now).toISOString(),
+  },
+};
 
 const getProductRelated = (id: string) => ({
   benefits: [
@@ -179,4 +220,18 @@ export const createDefaultProducts = () => {
     conn('products_benefits').insert(benefits),
     conn('products_commands').insert(commands),
   ]);
+};
+
+export const createDefaultCoupons = () => {
+  if (process.env.NODE_ENV !== 'test' || alreadyExecuted.coupons) return;
+
+  alreadyExecuted.coupons = true;
+
+  const data: TestCouponData[] = [];
+
+  Object.entries(couponsData).forEach(([, value]) => {
+    data.push(value);
+  });
+
+  return conn('coupons').insert(data);
 };
