@@ -227,11 +227,7 @@ export const createDefaultCoupons = () => {
 
   alreadyExecuted.coupons = true;
 
-  const data: TestCouponData[] = [];
-
-  Object.entries(couponsData).forEach(([, value]) => {
-    data.push(value);
-  });
+  const data = Object.values(couponsData);
 
   return conn('coupons').insert(data);
 };
